@@ -1,6 +1,6 @@
 import State from "../../../Wolfie2D/DataTypes/State/State";
 import GameEvent from "../../../Wolfie2D/Events/GameEvent";
-import { ItemEvent } from "../../Events/ItemEvent";
+import { BattlerEvent, HudEvent, ItemEvent } from "../../Events"
 import Item from "../../GameSystems/ItemSystem/Items/Item";
 import PlayerAI from "../PlayerAI";
 
@@ -40,20 +40,23 @@ export default abstract class PlayerState extends State {
 
     public override handleInput(event: GameEvent): void {
         switch(event.type) {
-            case "": {
-                this.parent.battler.handleEvent(event);
-                break;
-            }
-            case "BATTLER_CHANGED": {
-                this.emitter.fireEvent("btt", {battler: this.parent.battler});
+            case BattlerEvent.BATTLER_CHANGE: {
+                this.emitter.fireEvent(HudEvent.HEALTH_CHANGE, {
+                    id: this.parent.battler.owner.id, 
+                    curhp: this.parent.battler.health, 
+                    maxhp: this.parent.battler.maxHealth
+                });
                 break;
             }
             case ItemEvent.INVENTORY_CHANGED: {
                 this.handleInventoryChange(event);
                 break;
             }
-            case "WEAPON_HIT": {
-                // Delgate weapon hit event handling to the PlayerBattler
+            case BattlerEvent.CONSUME: {
+                this.parent.battler.handleEvent(event);
+                break;
+            }
+            case BattlerEvent.HIT: {
                 this.parent.battler.handleEvent(event);
                 break;  
             }
@@ -63,15 +66,23 @@ export default abstract class PlayerState extends State {
         }
     }
 
+    protected handleBattlerChange(event: GameEvent): void {
+        let id: number = this.parent.battler.owner.id;
+        let curhp: number = this.parent.battler.health;
+        let maxhp: number = 1;
+        this.emitter.fireEvent(HudEvent.HEALTH_CHANGE, {id: id, curhp: curhp, maxhp: maxhp});
+    }
+
     protected handleInventoryChange(event: GameEvent): void {
         let items: Item[] = event.data.get("inv");
-        // If the player doesn't have a held item and has an item in their inventory, give them an item
-        if (this.parent.item === null && items.length !== 0) {
-            this.parent.item = items.find((item: Item) => item);
-        }
+
         // If the player doesn't have their held item in their inventory, clear the players held item
-        if (items.find((item: Item) => this.parent.item.owner.id === item.owner.id) === undefined) {
+        if (this.parent.item !== null && items.find((item: Item) => this.parent.item.owner.id === item.owner.id) === undefined) {
             this.parent.item = null;
+        }
+        // If the player has items in their inventory, set the first item to be their held item
+        if (items.length !== 0) { 
+            this.parent.item = items.find((item: Item) => item)
         }
         // Update the inventory hud
         this.emitter.fireEvent("inv", {items: items});

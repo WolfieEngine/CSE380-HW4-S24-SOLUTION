@@ -1,4 +1,3 @@
-import Battler from "../BattleSystem/Battlers/Battler"
 import Updateable from "../../../Wolfie2D/DataTypes/Interfaces/Updateable";
 import Item from "./Items/Item";
 import Inventory from "./Inventory";
@@ -89,7 +88,7 @@ export default class ItemManager implements Updateable {
         if (inventory === null) return console.warn(`No inventory found for owner with id ${ownerId}`);
 
         let item: Item | null = inventory.find((item: Item) => true);
-        if (item === null) return console.log(`Owner with id ${ownerId} does not have any items they can drop`);
+        if (item === undefined || item === null) return console.log(`Owner with id ${ownerId} does not have any items they can drop`);
 
         item.drop(inventory.owner.position, inventory.owner.getLayer());
         console.log(inventory);

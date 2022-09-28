@@ -1,19 +1,28 @@
 import GameEvent from "../../../Wolfie2D/Events/GameEvent";
+import { Debugger } from "../../Debugger";
 import NPCState from "./NPCState";
 
 export default class Animating extends NPCState {
 
     onEnter(options: Record<string, any>): void {
-        throw new Error("Method not implemented.");
+        Debugger.print("npc", `NPC entering animate state! Owner id: ${this.parent.owner.id}`);
     }
     handleInput(event: GameEvent): void {
-        throw new Error("Method not implemented.");
+        Debugger.print("npc", `NPC handling event! Id: ${this.parent.owner.id} EventType: ${event.type}`);
+        switch(event.type) {
+            default: {
+                Debugger.print("npc", `NPC deffering handling of event to super class! Id: ${this.parent.owner.id}
+                EventType: ${event.type} SuperClass: ${super.constructor}`);
+                super.handleInput(event);
+                break;
+            }
+        }
     }
     update(deltaT: number): void {
-        throw new Error("Method not implemented.");
+        super.update(deltaT);
     }
     onExit(): Record<string, any> {
-        throw new Error("Method not implemented.");
+        return {}
     }
 
 }

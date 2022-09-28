@@ -1,9 +1,6 @@
-import Updateable from "../../../Wolfie2D/DataTypes/Interfaces/Updateable";
-import GameEvent from "../../../Wolfie2D/Events/GameEvent";
 import Receiver from "../../../Wolfie2D/Events/Receiver";
 import GameNode from "../../../Wolfie2D/Nodes/GameNode";
 import Inventory from "./Inventory";
-import ItemManager from "./ItemManager";
 import Item from "./Items/Item";
 
 export default class InventoryManager {

@@ -6,6 +6,7 @@ import Healthbar from "./Healthbar";
 import Updateable from "../../Wolfie2D/DataTypes/Interfaces/Updateable";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import CanvasNode from "../../Wolfie2D/Nodes/CanvasNode";
+import { HudEvent } from "../Events";
 
 export default class HealthbarManager implements Updateable {
 
@@ -21,6 +22,7 @@ export default class HealthbarManager implements Updateable {
         this.healthbars = new Map<Healthbar>();
 
         this.receiver = new Receiver();
+        this.receiver.subscribe(HudEvent.HEALTH_CHANGE);
         
     }
 
@@ -34,17 +36,22 @@ export default class HealthbarManager implements Updateable {
 
     }
     public addHealthbar(node: CanvasNode, size: Vec2) {
-        this.healthbars.add(node.id.toString(), new Healthbar(this.scene, this.layer, node));
+        this.healthbars.add(node.id.toString(), new Healthbar(this.scene, this.layer, new Vec2(32, 8), new Vec2(0, -16), node));
     }
     protected handleEvent(event: GameEvent): void {
         switch(event.type) {
+            case HudEvent.HEALTH_CHANGE: {
+                this.handleBattlerChangeEvent(event);
+                break;
+            }
             default: {
                 throw new Error(`Unhandled event of type ${event.type} caught in HealthbarManager.`);
             }
         }
     }
-    protected handleHealthChangeEvent(event: GameEvent): void {
+    protected handleBattlerChangeEvent(event: GameEvent): void {
         let id = event.data.get("id");
+
         if (this.healthbars.has(id)) {
             this.healthbars.get(id).updateHealthBar(event.data.get("curhp"), event.data.get("maxhp"));
         }

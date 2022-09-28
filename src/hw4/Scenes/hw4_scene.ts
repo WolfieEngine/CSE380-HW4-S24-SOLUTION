@@ -15,13 +15,15 @@ import ItemManager from "../GameSystems/ItemSystem/ItemManager";
 import PlayerBattler from "../GameSystems/BattleSystem/Battlers/PlayerBattler";
 import NPCBattler from "../GameSystems/BattleSystem/Battlers/NPCBattler";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
-import NPCBehavior from "../AI/NPCAI";
+import NPCBehavior from "../AI/NPCGoapAI";
 import Weapon from "../GameSystems/ItemSystem/Items/Weapon";
 import LaserGun from "../GameSystems/ItemSystem/ItemTypes/LaserGun";
 import InventoryHUD from "../UI/InventoryHUD";
 import PlayerAI from "../AI/PlayerAI";
 import Inventory from "../GameSystems/ItemSystem/Inventory";
 import { Debugger } from "../Debugger";
+import HealthPack from "../GameSystems/ItemSystem/ItemTypes/HealthPack";
+import Consumable from "../GameSystems/ItemSystem/Items/Consumable";
 
 
 export default class hw4_scene extends Scene {
@@ -95,6 +97,7 @@ export default class hw4_scene extends Scene {
         let tilemapSize: Vec2 = this.walls.size.scaled(0.5);
 
         this.viewport.setBounds(0, 0, tilemapSize.x, tilemapSize.y);
+        this.viewport.setZoomLevel(2);
 
         this.initLayers();
         this.initSubsystems();
@@ -102,16 +105,11 @@ export default class hw4_scene extends Scene {
         this.initPlayer();
         this.initItems();
 
+        this.viewport.follow(this.player);
+
         // Create the NPCS
         this.initNPCs();
         console.log("Test");
-
-        // Make the viewport follow the player
-        this.viewport.follow(this.player);
-
-        // Zoom in to a reasonable level
-        this.viewport.enableZoom();
-        this.viewport.setZoomLevel(4);
 
         // Subscribe to relevant events
         this.receiver.subscribe("healthpack");
@@ -123,7 +121,8 @@ export default class hw4_scene extends Scene {
 
         this.createNavmesh();
 
-        
+        Debugger.enable("battler");
+        Debugger.enable("health")
 
     }
 
@@ -155,7 +154,11 @@ export default class hw4_scene extends Scene {
         this.player.position.set(4*8, 62*8);
         this.player.addPhysics(new AABB(Vec2.ZERO, new Vec2(8, 8)));
 
-        let battler: PlayerBattler | null = this.battleManager.register(PlayerBattler, this.player, null);
+        let battler: PlayerBattler | null = this.battleManager.register(PlayerBattler, this.player, {
+            health: 2,
+            maxHealth: 5,
+            speed: 1
+        });
         let inventory: Inventory | null = this.itemManager.registerInventory(this.player, []);
         this.healthbarManager.addHealthbar(this.player, this.player.size.clone());
 
@@ -171,10 +174,15 @@ export default class hw4_scene extends Scene {
             this.npcs[i].position.set(4*12, 62*8);
             this.npcs[i].addPhysics(new AABB(Vec2.ZERO, new Vec2(8, 8)));
 
-            this.npcs[i].addAI(NPCBehavior, {});
+            let battler: NPCBattler | null = this.battleManager.register(NPCBattler, this.npcs[i], {
+                health: 5,
+                maxHealth: 5,
+                speed: 1
+            });
+            let inventory: Inventory | null = this.itemManager.registerInventory(this.npcs[i], []);
+            this.healthbarManager.addHealthbar(this.npcs[i], this.npcs[i].size.clone());
 
-            this.battleManager.register(NPCBattler, this.npcs[i], null);
-            this.itemManager.registerInventory(this.npcs[i], []);
+            this.npcs[i].addAI(NPCBehavior, {battler: battler, inventory: inventory});
 
             this.npcs[i].animation.play("IDLE");
         }
@@ -190,6 +198,13 @@ export default class hw4_scene extends Scene {
             this.weapons[i] = this.add.sprite("laserGun", "primary")
             this.weapons[i].position.set(items.items[i].position[0], items.items[i].position[1]);
             this.itemManager.registerItem(Weapon, this.weapons[i], new LaserGun(this, "test", 3));
+        }
+
+        this.consumables = new Array<Sprite>(1);
+        for (let i = 0; i < 1; i++) {
+            this.consumables[i] = this.add.sprite("healthpack", "primary");
+            this.consumables[i].position.copy(this.player.position);
+            this.itemManager.registerItem(Consumable, this.consumables[i], new HealthPack(this, "test", 3));
         }
     }
 

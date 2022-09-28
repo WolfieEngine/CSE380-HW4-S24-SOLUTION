@@ -1,4 +1,3 @@
-import BattlerBehavior from "./BattlerType";
 import Updateable from "../../../Wolfie2D/DataTypes/Interfaces/Updateable";
 import Receiver from "../../../Wolfie2D/Events/Receiver";
 import GameEvent from "../../../Wolfie2D/Events/GameEvent";
@@ -6,8 +5,7 @@ import Battler from "./Battlers/Battler";
 import GameNode from "../../../Wolfie2D/Nodes/GameNode";
 import Emitter from "../../../Wolfie2D/Events/Emitter";
 import BattlerType from "./BattlerType";
-import { ItemEvent } from "../../Events/ItemEvent";
-import WeaponType from "../ItemSystem/ItemTypes/WeaponType";
+import { ItemEvent, BattlerEvent } from "../../Events";
 import ConsumableType from "../ItemSystem/ItemTypes/ConsumableType";
 
 export default class BattleManager implements Updateable {
@@ -82,35 +80,41 @@ export default class BattleManager implements Updateable {
             }
             case ItemEvent.CONSUMABLE_USED: {
                 this.handleItemConsumedEvent(event);
+                break;
             }
             default: {
                 throw new Error(`Unhandled event type ${event.type} in BattleManager event handler.`);
+                break;
             }
         }
     }
     protected handleItemConsumedEvent(event: GameEvent): void {
         let type: ConsumableType = event.data.get("type");
-        let consumerId: number = event.data.get("consumer");
+        let consumerId: number = event.data.get("consumerId");
         if (this.battlers.has(consumerId)) {
-            this.battlers.get(consumerId).owner._ai.handleEvent(new GameEvent("CONSUME_ITEM", {type: type}));
+            this.battlers.get(consumerId).owner._ai.handleEvent(new GameEvent(BattlerEvent.CONSUME, {
+                consumerId: consumerId,
+                item: event.data.get("item"), 
+                type: event.data.get("type"), 
+                effects: event.data.get("effects"),
+            }));
         } else {
             console.warn(`
-                Error! Node with id ${consumerId} is not a registered battler and is 
-                attempting to consume a consumable with type ${type.constructor}.
+                Error! Node with id ${consumerId} is not a registered battler!
             `);
         }
     }
     protected handleWeaponUsedEvent(event: GameEvent): void {
-        let type: WeaponType = event.data.get("type");
         let hits: Array<GameNode> = event.data.get("hits");
 
         for (let hit of hits) {
             if (this.battlers.has(hit.id)) {
-                this.battlers.get(hit.id).owner._ai.handleEvent(new GameEvent("WEAPON_HIT", {type: type}));
+                this.battlers.get(hit.id).owner._ai.handleEvent(new GameEvent(BattlerEvent.HIT, {
+                    userId: event.data.get("userId"), item: event.data.get("item"), type: event.data.get("type")
+                }));
             } else {
                 console.warn(`
-                    Error! Node with id ${hit.id} is not a registered battler 
-                    and was hit by a ${type.constructor}
+                    Error! Node with id ${hit.id} is not a registered battler.
                 `);
             }
         }

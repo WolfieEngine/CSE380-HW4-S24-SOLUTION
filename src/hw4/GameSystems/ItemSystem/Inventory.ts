@@ -1,8 +1,6 @@
-import Debug from "../../../Wolfie2D/Debug/Debug";
-import Emitter from "../../../Wolfie2D/Events/Emitter";
 import GameEvent from "../../../Wolfie2D/Events/GameEvent";
 import GameNode from "../../../Wolfie2D/Nodes/GameNode";
-import { ItemEvent } from "../../Events/ItemEvent";
+import { ItemEvent } from "../../Events";
 import Item from "./Items/Item";
 
 export default class Inventory {
@@ -69,7 +67,7 @@ export default class Inventory {
         return item;
     }
 
-    find(pred: (item: Item) => boolean): Item | null {
+    find(pred: (item: Item) => boolean): Item | undefined {
        return Array.from(this.inv.values()).find(pred);
     }
 

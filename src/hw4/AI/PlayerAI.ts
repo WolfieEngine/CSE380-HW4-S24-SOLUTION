@@ -1,6 +1,7 @@
 import StateMachineAI from "../../Wolfie2D/AI/StateMachineAI";
 import AI from "../../Wolfie2D/DataTypes/Interfaces/AI";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
+import GameNode from "../../Wolfie2D/Nodes/GameNode";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import PlayerBattler from "../GameSystems/BattleSystem/Battlers/PlayerBattler";
 import Inventory from "../GameSystems/ItemSystem/Inventory";
@@ -10,12 +11,20 @@ import Weapon from "../GameSystems/ItemSystem/Items/Weapon";
 import PlayerController from "./PlayerController";
 import { Idle, Invincible, Moving, PlayerStateType } from "./PlayerStates/PlayerState";
 
+/**
+ * 
+ */
 export default class PlayerAI extends StateMachineAI implements AI {
 
+    /** The GameNode that owns this AI */
     public owner: AnimatedSprite;
+    /**  */
     public controller: PlayerController;
+    /** The battler object associated with the player */
     public battler: PlayerBattler;
+    /** The inventory object associated with the player */
     public inventory: Inventory;
+    /** The players held item */
     public item: Item | null;
     
     public initializeAI(owner: AnimatedSprite, opts: Record<string, any>): void {
@@ -61,4 +70,5 @@ export default class PlayerAI extends StateMachineAI implements AI {
             }
         }
     }
+
 }
