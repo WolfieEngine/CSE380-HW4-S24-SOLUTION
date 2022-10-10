@@ -1,51 +1,43 @@
-import GoapActionPlanner from "../../Wolfie2D/AI/GoapActionPlanner";
 import StateMachineAI from "../../Wolfie2D/AI/StateMachineAI";
-import Stack from "../../Wolfie2D/DataTypes/Collections/Stack";
-import GoapAI from "../../Wolfie2D/DataTypes/Interfaces/GoapAI";
+import AI from "../../Wolfie2D/DataTypes/Interfaces/AI";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
+import Emitter from "../../Wolfie2D/Events/Emitter";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import GameNode from "../../Wolfie2D/Nodes/GameNode";
+import NavigationPath from "../../Wolfie2D/Pathfinding/NavigationPath";
+import { BattlerEvent, HudEvent, ItemEvent } from "../Events";
 import NPCBattler from "../GameSystems/BattleSystem/Battlers/NPCBattler";
 import Inventory from "../GameSystems/ItemSystem/Inventory";
+import Consumable from "../GameSystems/ItemSystem/Items/Consumable";
 import Item from "../GameSystems/ItemSystem/Items/Item";
+import Weapon from "../GameSystems/ItemSystem/Items/Weapon";
+import GoapPlan from "./Goap/GoapPlan";
+import GotoPlayer from "./NPCActions/GotoPlayer";
 import NPCAction from "./NPCActions/NPCAction";
-import Animating from "./NPCStates/Animating";
-import Moving from "./NPCStates/Moving";
-import { NPCStateType } from "./NPCStates/NPCState";
 
-/**
- * An implementation of an AI that uses goal-oriented-action-planning (GOAP). I have made this AI based on the
- * description of the GOAP AI Jeff Orkins describes in his paper reflecting on the use of GOAP AI in F.E.A.R.
- */
-export default class NPCGoapAI extends StateMachineAI implements GoapAI {
+export default class NPCGoapAI implements AI {
 
     public owner: GameNode;
-
-    public goal: string;
-    protected _currentStatus: Set<string>;
-    public possibleActions: NPCAction[];
-    public plan: Stack<NPCAction>;
-    public planner: GoapActionPlanner<NPCAction>;
-    
-    public battler: NPCBattler;
+    protected goap: GoapPlan<NPCAction<any>>;
+    protected navkey: string;
+    protected battler: NPCBattler;
     public inventory: Inventory;
     public item: Item | null;
 
+    protected emitter: Emitter;
+
     initializeAI(owner: GameNode, opts: Record<string, any>): void {
         this.owner = owner;
+        this.navkey = opts.navkey;
         this.battler = opts.battler;
         this.inventory = opts.inventory;
-        this.item = null;
 
-        this.goal = "";
-        this.currentStatus = [];
-        this.possibleActions = [];
-        this.plan = null;
-        this.planner = new GoapActionPlanner<NPCAction>();
+        this.goap = opts.goap;
+        this.goap.initialize(this);
+
+        this.item = null;
+        this.emitter = new Emitter();
         
-        this.addState(NPCStateType.ANIMATING, new Animating(this));
-        this.addState(NPCStateType.MOVING, new Moving(this));
-        this.initialize(NPCStateType.ANIMATING, {});
     }
 
     destroy(): void {
@@ -55,13 +47,31 @@ export default class NPCGoapAI extends StateMachineAI implements GoapAI {
         throw new Error("Method not implemented.");
     }
 
-    /**
-     * The handleEvent() method of the NPCGoapAI calls the super.handleEvent() method, delegating the
-     * handling of events to the current State of this StateMachineAI.
-     * @param event 
-     */
     handleEvent(event: GameEvent): void {
-        super.handleEvent(event);
+        switch(event.type) {
+            case BattlerEvent.BATTLER_CHANGE: {
+                this.emitter.fireEvent(HudEvent.HEALTH_CHANGE, {
+                    id: this.owner.id,
+                    curhp: this.battler.health,
+                    maxhp: this.battler.maxHealth 
+                });
+                break;
+            }
+            case ItemEvent.INVENTORY_CHANGED: {
+                break;
+            }
+            case BattlerEvent.HIT: {
+                this.battler.handleEvent(event);
+                break;
+            }
+            case BattlerEvent.CONSUME: {
+                this.battler.handleEvent(event);
+                break;
+            }
+            default: {
+                throw new Error(`Unhandled event with type ${event.type} and data ${event.data} caught in NPC`);
+            }
+        }
     }
 
     /**
@@ -76,37 +86,21 @@ export default class NPCGoapAI extends StateMachineAI implements GoapAI {
      * 
      * @param deltaT the amount of time elapsed since the last update cycle
      */
-    update(deltaT: number): void {
-        super.update(deltaT);
-
-        // if (this.plan.isEmpty()) {
-        //     this.plan = this.planner.plan(this.goal, this.possibleActions, this.currentStatus);
-        // }
-
-        // let action: NPCAction = this.plan.peek();
-        // let result: string[] = action.performAction(this.currentStatus, this, deltaT);
-
-        // if (result === null || !action.loopAction) { this.plan.pop(); }
-        // else if (result.length !== 0) { result.forEach(status => this._currentStatus.add(status)); }
+    public update(deltaT: number): void {
+        this.goap.update(deltaT);
     }
 
-    public move(dest: Vec2, rng: number): void {
-        let move: Moving = <Moving>this.stateMap.get(NPCStateType.MOVING);
-        if (move !== undefined) {
-            move.pos.copy(dest);
-            move.rng = rng;
-            if (this.currentState.constructor !== Moving) {
-                this.changeState(NPCStateType.MOVING);
-            }
-        } 
-    }
+    /** GameNode interface */
 
-    public get currentStatus(): string[] { return Array.from(this._currentStatus); }
-    public set currentStatus(currentStatus: string[]) { 
-        if (this._currentStatus === undefined) {
-            this._currentStatus = new Set<string>();
-        }
-        this._currentStatus.clear(); 
-        currentStatus.forEach(status => this._currentStatus.add(status));
-    }
+    public get position(): Vec2 { return this.owner.position; }
+    public get id(): number { return this.owner.id; }
+    public getPath(to: Vec2): NavigationPath { return this.owner.getScene().getNavigationManager().getPath(this.navkey, this.owner.position, to, false); }
+    public moveOnPath(speed: number, path: NavigationPath): void { this.owner.moveOnPath(speed, path); }
+
+    /** Battler Interface */
+
+    public get health(): number { return this.battler.health; }
+    public get maxHealth(): number { return this.battler.maxHealth; }
+    public get speed(): number { return this.battler.speed; }
+    
 }
