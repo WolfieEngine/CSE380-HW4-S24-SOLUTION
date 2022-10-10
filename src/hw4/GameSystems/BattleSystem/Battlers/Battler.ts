@@ -17,7 +17,6 @@ import HealthPack from "../../ItemSystem/ItemTypes/HealthPack";
 export default class Battler {
 
     protected _owner: GameNode;
-    protected _manager: BattleManager;
 
     protected _maxHealth: number;
     protected _health: number;
@@ -29,7 +28,6 @@ export default class Battler {
     public constructor(owner: GameNode, battlerType: BattlerType) {
         this.owner = owner;
         this.emitter = new Emitter();
-
         this.maxHealth = battlerType.maxHealth;
         this.health = battlerType.health;
         this.speed = battlerType.speed;
