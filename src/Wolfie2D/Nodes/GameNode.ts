@@ -19,7 +19,6 @@ import Debug from "../Debug/Debug";
 import Color from "../Utils/Color";
 import Circle from "../DataTypes/Shapes/Circle";
 import GoapAI from "../DataTypes/Interfaces/GoapAI";
-import GoapAction from "../DataTypes/Interfaces/GoapAction";
 
 /**
  * The representation of an object in the game world.
@@ -160,7 +159,7 @@ export default abstract class GameNode implements Positioned, Unique, Updateable
 	};
 
 	moveOnPath(speed: number, path: NavigationPath): void {
-		if(this.frozen) return;
+		if(this.frozen || path.isDone()) return;
 		this.path = path;
 		let dir = path.getMoveDirection(this);
 		this.moving = true;

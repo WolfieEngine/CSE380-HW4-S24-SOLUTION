@@ -36,13 +36,21 @@ export default class Navmesh implements Navigable {
 
 		pathStack.push(this.graph.positions[end]);
 
-		let parent = GraphUtils.djikstra(this.graph, start);
+		// let parent = GraphUtils.djikstra(this.graph, start);
 
-		// Add all parents along the path
-		let i = end;
-		while(parent[i] !== -1){
+		// // Add all parents along the path
+		// let i = end;
+		// while(parent[i] !== -1){
+		// 	pathStack.push(this.graph.positions[parent[i]]);
+		// 	i = parent[i];
+		// }
+
+		let parent: number[] = GraphUtils.astar(this.graph, start, end, (node: number) => { 
+			return this.graph.getNodePosition(node).distanceTo(this.graph.getNodePosition(end)); 
+		});
+
+		for (let i = parent.length - 1; i >= 0; i--) {
 			pathStack.push(this.graph.positions[parent[i]]);
-			i = parent[i];
 		}
 
 		return new NavigationPath(pathStack);

@@ -46,7 +46,7 @@ export default class NavigationPath {
 	 * @param node The node moving along the path
 	 */
 	handlePathProgress(node: GameNode): void {
-		if(node.position.distanceSqTo(this.path.peek()) < this.distanceThreshold*this.distanceThreshold){
+		if(!this.path.isEmpty() && node.position.distanceSqTo(this.path.peek()) < this.distanceThreshold*this.distanceThreshold){
 			// We've reached our node, move on to the next destination
 			this.path.pop();
 		}
