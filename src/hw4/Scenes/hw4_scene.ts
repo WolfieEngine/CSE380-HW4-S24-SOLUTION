@@ -24,6 +24,9 @@ import Inventory from "../GameSystems/ItemSystem/Inventory";
 import { Debugger } from "../Debugger";
 import HealthPack from "../GameSystems/ItemSystem/ItemTypes/HealthPack";
 import Consumable from "../GameSystems/ItemSystem/Items/Consumable";
+import GoapPlanFactory from "../AI/NPCActions/NPCActionFactory";
+import GoapPlan from "../AI/Goap/GoapPlan";
+import NPCAction from "../AI/NPCActions/NPCAction";
 
 
 export default class hw4_scene extends Scene {
@@ -33,6 +36,7 @@ export default class hw4_scene extends Scene {
     private itemManager: ItemManager;
     private healthbarManager: HealthbarManager;
     private inventoryHud: InventoryHUD;
+    private goapFactory: GoapPlanFactory;
 
     /** GameNodes in the HW4 Scene */
     private player: AnimatedSprite;
@@ -62,13 +66,13 @@ export default class hw4_scene extends Scene {
         // Load the tilemap
         // HOMEWORK 4 - TODO
         // Change this file to be your own tilemap
-        this.load.tilemap("level", "hw4_assets/tilemaps/cse380_hw4_tilejson.json");
+        this.load.tilemap("level", "hw4_assets/tilemaps/HW3Map.json");
 
         // Load the scene info
         this.load.object("weaponData", "hw4_assets/data/weaponData.json");
 
         // Load the nav mesh
-        this.load.object("navmesh", "hw4_assets/data/navmesh.json");
+        this.load.object("navmesh", "hw4_assets/data/navmesh2.json");
 
         // Load in the enemy info
         this.load.object("enemyData", "hw4_assets/data/enemy.json");
@@ -88,13 +92,13 @@ export default class hw4_scene extends Scene {
     startScene(){
         // Debugger.enable("battler");
         // Add in the tilemap
-        let tilemapLayers = this.add.tilemap("level", new Vec2(0.5, 0.5));
+        let tilemapLayers = this.add.tilemap("level");
 
         // Get the wall layer
         this.walls = <OrthogonalTilemap>tilemapLayers[1].getItems()[0];
 
         // Set the viewport bounds to the tilemap
-        let tilemapSize: Vec2 = this.walls.size.scaled(0.5);
+        let tilemapSize: Vec2 = this.walls.size;
 
         this.viewport.setBounds(0, 0, tilemapSize.x, tilemapSize.y);
         this.viewport.setZoomLevel(2);
@@ -104,6 +108,8 @@ export default class hw4_scene extends Scene {
         // Create the player
         this.initPlayer();
         this.initItems();
+
+        this.goapFactory = new GoapPlanFactory(this.player, this.battleManager, this.itemManager);
 
         this.viewport.follow(this.player);
 
@@ -151,7 +157,7 @@ export default class hw4_scene extends Scene {
 
     initPlayer(): void {
         this.player = this.add.animatedSprite("player1", "primary");
-        this.player.position.set(4*8, 62*8);
+        this.player.position.set(40, 96);
         this.player.addPhysics(new AABB(Vec2.ZERO, new Vec2(8, 8)));
 
         let battler: PlayerBattler | null = this.battleManager.register(PlayerBattler, this.player, {
@@ -171,7 +177,7 @@ export default class hw4_scene extends Scene {
         this.npcs = new Array<AnimatedSprite>(1);
         for (let i = 0; i < this.npcs.length; i++) {
             this.npcs[i] = this.add.animatedSprite("gun_enemy", "primary");
-            this.npcs[i].position.set(4*12, 62*8);
+            this.npcs[i].position.set(360, 424);
             this.npcs[i].addPhysics(new AABB(Vec2.ZERO, new Vec2(8, 8)));
 
             let battler: NPCBattler | null = this.battleManager.register(NPCBattler, this.npcs[i], {
@@ -182,8 +188,14 @@ export default class hw4_scene extends Scene {
             let inventory: Inventory | null = this.itemManager.registerInventory(this.npcs[i], []);
             this.healthbarManager.addHealthbar(this.npcs[i], this.npcs[i].size.clone());
 
-            this.npcs[i].addAI(NPCBehavior, {battler: battler, inventory: inventory});
+            let goap: GoapPlan<NPCAction<Record<string, any>>> = this.goapFactory.build("")
 
+            this.npcs[i].addAI(NPCBehavior, {
+                navkey: "navmesh",
+                battler: battler, 
+                inventory: inventory,
+                goap: goap
+            });
             this.npcs[i].animation.play("IDLE");
         }
     }
@@ -211,12 +223,10 @@ export default class hw4_scene extends Scene {
     /**
      * 
      */
-
-
     createNavmesh(): void {
         // Add a layer to display the graph
         let gLayer = this.addLayer("graph");
-        gLayer.setHidden(true);
+        // gLayer.setHidden(true);
 
         let navmeshData = this.load.getObject("navmesh");
 
@@ -225,8 +235,8 @@ export default class hw4_scene extends Scene {
 
         // Add all nodes to our graph
         for(let node of navmeshData.nodes){
-            this.graph.addPositionedNode(new Vec2(node[0]/2, node[1]/2));
-            this.add.graphic(GraphicType.POINT, "graph", {position: new Vec2(node[0]/2, node[1]/2)})
+            this.graph.addPositionedNode(new Vec2(node[0], node[1]));
+            this.add.graphic(GraphicType.POINT, "graph", {position: new Vec2(node[0], node[1])})
         }
 
         // Add all edges to our graph
