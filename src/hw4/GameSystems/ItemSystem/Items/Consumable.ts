@@ -18,7 +18,7 @@ export default class Consumable extends Item {
     public use(consumer: GameNode): void {
         this._type.animate(consumer);
         this.emitter.fireEvent(ItemEvent.CONSUMABLE_USED, {consumerId: consumer.id, item: this, type: this.type, effects: this.type.effects});
-        this.destroy();
+        super.destroy();
     }
 
     public override get type(): ConsumableType { return this._type; }
