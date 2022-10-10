@@ -56,7 +56,7 @@ export default class Inventory {
         return this.inv.has(id);
     }
 
-    remove(id: number): Item { 
+    remove(id: number): Item | null { 
         if (!this.has(id)) {
             return null;
         }
@@ -67,8 +67,9 @@ export default class Inventory {
         return item;
     }
 
-    find(pred: (item: Item) => boolean): Item | undefined {
-       return Array.from(this.inv.values()).find(pred);
+    find(pred: (item: Item) => boolean): Item | null {
+       let item: Item = Array.from(this.inv.values()).find(pred);
+       return item === undefined ? null : item;
     }
 
     findAll(pred: (item: Item) => boolean): Item[] | [] {
