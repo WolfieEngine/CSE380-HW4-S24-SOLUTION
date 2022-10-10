@@ -1,58 +1,47 @@
+import AI from "../../../Wolfie2D/DataTypes/Interfaces/AI";
+import NavigationPath from "../../../Wolfie2D/Pathfinding/NavigationPath";
 import ItemManager from "../../GameSystems/ItemSystem/ItemManager";
 import Item from "../../GameSystems/ItemSystem/Items/Item";
 import HealthPack from "../../GameSystems/ItemSystem/ItemTypes/HealthPack";
+import { GoapActionStatus } from "../Goap/GoapAction";
 import NPCGoapAI from "../NPCGoapAI";
 import NPCAction from "./NPCAction";
 
-export default class PickupHealthpack extends NPCAction {
+export default class PickupHealthpack extends NPCAction<PickupHealthpackOptions> {
 
     protected items: ItemManager;
-    protected item: Item | null;
+    protected healthpack: Item | null;
+    protected path: NavigationPath | null;
 
-    public constructor(cost: number, preconditions: string[], effects: string[], loopAction: boolean, items: ItemManager) {
-        super(cost, preconditions, effects, loopAction);
-        this.items = items;
-        this.item = null;
+    constructor(init: PickupHealthpackOptions, cost?: number, preconditions?: string[], effects?: string[]) {
+        super(cost, preconditions, effects);
+        this.items = init.items;
     }
 
-    public override performAction(statuses: string[], actor: NPCGoapAI, deltaT: number): string[] {
-        // If the preconditions have been met, try to perform the action; otherwise return null (failure)
-        if (this.checkPreconditions(statuses)) {
+    init(init: PickupHealthpackOptions): void {
+        this.items = init.items;
+        this.healthpack = null;
+        this.path = null;
+    }
+   
+    start(npc: NPCGoapAI): void {
 
-            // First, set the healthpack we want to move to
-            if (this.item === null) {
-                // Find the healthpack
-                this.item = this.items.findItem((item: Item) => item.type.constructor === HealthPack && item.inv === null);
-                // Start moving the actor towards the item
-                actor.move(this.item.owner.position, 16);
-            }
-
-            // If the actor is at the items location, try to pickup the item; Otherwise loop until success or failure
-            if (this.item.owner.position.distanceSqTo(actor.owner.position) < 16) {
-                // Try to pickup the item
-                let item: Item = this.item.pickup(actor.inventory);
-                // If picking up the item fails, return null (failure)
-                if (item === null) { 
-                    return null;
-                }
-                // Otherwise, clear the item we're looking for and return effects (success)
-                this.item = null;
-                return this.effects
-            } else {
-                // Loop until
-                return [];
-            }
+    }
+    run(npc: NPCGoapAI): GoapActionStatus {
+        if (this.path.isDone()) {
+            return this.healthpack.pickup(npc.inventory) !== null ? GoapActionStatus.SUCCESS : GoapActionStatus.FAILURE;
         }
-        return null;
+        npc.moveOnPath(npc.speed, this.path);
     }
-  
-    /**
-     * Checks whether or not the NPCGoapAI can pickup an item or not. In addition to checking whether or not
-     * the statuses have been met, there must be a healthpack item available that is not in an inventory.
-     * @param statuses the statuses of the NPCGoapAI
-     * @returns true if the preconditions have been met; false otherwise.
-     */
-    public override checkPreconditions(statuses: string[]): boolean {
-        return this.preconditions.every(status => statuses.includes(status)) && this.items.findItem((item: Item) => item.type.constructor === HealthPack && item.inv === null) !== undefined;
+    stop(npc: NPCGoapAI): void { }
+    
+    checkProceduralPreconditions(npc: NPCGoapAI): boolean {
+        this.healthpack = this.items.findItem((item: Item) => item.type.constructor === HealthPack && item.inv === null);
+        this.path = this.healthpack !== null ? npc.getPath(this.healthpack.owner.position) : null;
+        return this.healthpack !== null && npc.health < npc.maxHealth;
     }
+}
+
+interface PickupHealthpackOptions {
+    items: ItemManager;
 }
