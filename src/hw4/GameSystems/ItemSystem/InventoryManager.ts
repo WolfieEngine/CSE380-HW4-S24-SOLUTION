@@ -43,5 +43,11 @@ export default class InventoryManager {
         return inv;
     }
 
+    public unregister(id: number): Inventory | null {
+        let inv: Inventory | null = this.inventories.get(id);
+        if (inv === null) return null;
+        inv.forEach((item: Item) => item.drop(inv.owner.position, inv.owner.getLayer()));
+        return this.inventories.delete(id) ? inv : null;
+    }
 
 }

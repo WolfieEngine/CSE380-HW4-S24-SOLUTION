@@ -1,4 +1,5 @@
 import Vec2 from "../../../../Wolfie2D/DataTypes/Vec2";
+import Emitter from "../../../../Wolfie2D/Events/Emitter";
 import Sprite from "../../../../Wolfie2D/Nodes/Sprites/Sprite";
 import Layer from "../../../../Wolfie2D/Scene/Layer";
 import { Debugger } from "../../../Debugger";
@@ -13,14 +14,16 @@ export default abstract class Item {
     /** The type of the item */
     protected _type: ItemType;
 
+    protected emitter: Emitter;
+
     public constructor(owner: Sprite, type: ItemType){ 
         this.owner = owner; 
         this.type = type;
         this.inv = null;
+        this.emitter = new Emitter();
     }
 
     public pickup(inv: Inventory): Item | null {
-        Debugger.print("item", `Picking up an item! Item sprite id: ${this.owner.id} Inventory owner id: ${inv.owner.id}`);
         if (this.inv !== null) {
             return null;
         }
@@ -31,7 +34,6 @@ export default abstract class Item {
     }
 
     public drop(position: Vec2, layer: Layer): Item | null { 
-        Debugger.print("item", `Dropping an item! Item sprite id: ${this.owner.id} Position: ${position} Layer ${layer}`)
         if (this.inv === null) {
             return null;
         }
@@ -47,7 +49,6 @@ export default abstract class Item {
     }
 
     public move(des: Inventory): Item | null {
-        console.log(`Moving an item with name ${this.type.name}`);
         if (this.inv === null) {
             return null
         }

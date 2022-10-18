@@ -53,11 +53,17 @@ export default class ItemManager implements Updateable {
 
     /** Registers an inventory in the ItemManager */
     public registerInventory(owner: GameNode, items?: Array<Item>, cap?: number): Inventory | null {
-        // items.forEach(item => this.registerItem(item));
         return this.inventoryManager.register(owner, items);
     }
+
+    public unregisterInventory(id: number): Inventory | null{
+        return this.inventoryManager.unregister(id);
+    }
     
-    public getItem(id: number): Item | null { return this.items.get(id); }
+    public getItem(id: number): Item | null { 
+        let item: Item | undefined = this.items.get(id);
+        return item === undefined ? null : item;
+    }
 
     public hasItem(id: number): boolean { return this.items.has(id); }
 
@@ -66,8 +72,18 @@ export default class ItemManager implements Updateable {
     public hasInventory(id: number): boolean { return this.inventoryManager.has(id); }
 
     public findItem(pred: (item: Item) => boolean): Item | null {
-        let item = Array.from(this.items.values()).find(pred);
-        return item === undefined ? null : item;
+        for (let item of this.items.values()) {
+            if (pred(item)) return item;
+        }
+        return null;
+    }
+
+    public findItems(pred: (item: Item) => boolean): Item[] | [] { 
+        let items: Item[] = [];
+        for (let item of this.items.values()) {
+            if (pred(item)) items.push(item);
+        }
+        return items;
     }
 
     public handlePickup(event: GameEvent): void { 

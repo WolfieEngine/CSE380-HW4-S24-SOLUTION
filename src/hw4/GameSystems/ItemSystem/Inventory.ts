@@ -76,7 +76,11 @@ export default class Inventory {
         return Array.from(this.inv.values()).filter(pred);
     }
 
-    forEach(func: (item: Item) => void): void {}
+    forEach(func: (item: Item) => void): void {
+        for (let item of this.inv.values()) {
+            func(item);
+        }
+    }
 
     public clean(): void {
         this._dirty = false;

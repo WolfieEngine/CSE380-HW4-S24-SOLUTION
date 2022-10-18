@@ -8,11 +8,9 @@ import Item from "./Item";
 export default class Consumable extends Item {
 
     protected _type: ConsumableType;
-    protected emitter: Emitter;
 
     public constructor(owner: Sprite, type: ConsumableType) {
         super(owner, type);
-        this.emitter = new Emitter();
     }
 
     public use(consumer: GameNode): void {
