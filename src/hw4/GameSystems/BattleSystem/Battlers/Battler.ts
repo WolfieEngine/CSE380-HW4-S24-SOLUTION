@@ -20,36 +20,19 @@ export default class Battler {
 
     protected _maxHealth: number;
     protected _health: number;
+    protected _group: number;
     protected _speed: number;
 
     protected _dirty: boolean;
     protected emitter: Emitter;
     
-    public constructor(owner: GameNode, battlerType: BattlerType) {
+    public constructor(owner: GameNode, type: BattlerType) {
         this.owner = owner;
         this.emitter = new Emitter();
-        this.maxHealth = battlerType.maxHealth;
-        this.health = battlerType.health;
-        this.speed = battlerType.speed;
-    }
-
-    public handleEvent(event: GameEvent): void {
-        switch (event.type) {
-            case BattlerEvent.HIT: {
-                Debugger.print("battler", `Got a hit event in battler with owner id ${this.owner.id}`);
-                this.handleHit(event);
-                break;
-            }
-            case BattlerEvent.CONSUME: {
-                Debugger.print("battler", `Got a consume event in battler with owner id ${this.owner.id}`);
-                this.handleConsumeItem(event);
-                break;
-            }
-            default: {
-                throw new Error(`Unhandled event in Battler with type ${event.type}`);
-                break;
-            }
-        }
+        this.maxHealth = type.maxHealth;
+        this.health = type.health;
+        this.speed = type.speed;
+        this.group = type.group
     }
 
     public clean(): void {
@@ -65,18 +48,23 @@ export default class Battler {
     public get maxHealth(): number { return this._maxHealth; }
     public get health(): number { return this._health; }
     public get speed(): number { return this._speed; }
+    public get group(): number { return this._group; }
     public get dirty(): boolean { return this._dirty; }
 
-    protected set maxHealth(maxHealth: number) { 
+    public set maxHealth(maxHealth: number) { 
         this._maxHealth = maxHealth;
         this.dirty = true;
     }
-    protected set health(health: number) { 
+    public set health(health: number) { 
         this._health = MathUtils.clamp(health, 0, this.maxHealth); 
         this.dirty = true;
     }
-    protected set speed(speed: number) {
+    public set speed(speed: number) {
         this._speed = speed;
+        this.dirty = true;
+    }
+    public set group(group: number) {
+        this._group = group;
         this.dirty = true;
     }
     protected set owner(owner: GameNode) { 
@@ -99,7 +87,6 @@ export default class Battler {
             }
         }
     }
-
     protected handleWeaponHit(event: GameEvent): void {
         let type: WeaponType = event.data.get("type");
         switch(type.constructor) {

@@ -45,11 +45,17 @@ export default class BattleManager implements Updateable {
             }
         });
     }
+    public find(pred: (battler: Battler) => boolean): Battler | null {
+        for (let b of this.battlers.values()) {
+            if (pred(b)) return b;
+        }
+        return null;
+    }
     /** 
      * Finds and returns an Array of BattlerAI that meet the given criteria
      * @return an array of BattlerAI
      */
-    public find(pred: (battler: Battler) => boolean): Array<Battler> {
+    public findAll(pred: (battler: Battler) => boolean): Array<Battler> {
         return Array.from(this.battlers.keys()).filter((k: number) => { 
             return pred(this.battlers.get(k));
         }).map((k: number) => { 
@@ -68,6 +74,11 @@ export default class BattleManager implements Updateable {
         this.battlers.set(owner.id, battler);
         return battler;
     } 
+    public unregister(id: number): Battler | null {
+        let battler: Battler = this.battlers.get(id);
+        this.battlers.delete(id);
+        return battler === undefined ? null : battler
+    }
     /**
      * Delegates handling a BattleEvent to an instance of BattleAI
      * @param event the BattleEvent that occured
@@ -89,28 +100,23 @@ export default class BattleManager implements Updateable {
         }
     }
     protected handleItemConsumedEvent(event: GameEvent): void {
-        let type: ConsumableType = event.data.get("type");
         let consumerId: number = event.data.get("consumerId");
-        if (this.battlers.has(consumerId)) {
-            this.battlers.get(consumerId).owner._ai.handleEvent(new GameEvent(BattlerEvent.CONSUME, {
-                consumerId: consumerId,
-                item: event.data.get("item"), 
-                type: event.data.get("type"), 
-                effects: event.data.get("effects"),
-            }));
+        if (this.battlers.has(consumerId) && this.battlers.get(consumerId).owner.aiActive) {
+            this.battlers.get(consumerId).owner._ai.handleEvent(event);
         } else {
-            console.warn(`
-                Error! Node with id ${consumerId} is not a registered battler!
-            `);
+            console.warn(`Error! Node with id ${consumerId} is not a registered battler!`);
         }
     }
     protected handleWeaponUsedEvent(event: GameEvent): void {
         let hits: Array<GameNode> = event.data.get("hits");
 
         for (let hit of hits) {
-            if (this.battlers.has(hit.id)) {
+            if (this.battlers.has(hit.id) && this.battlers.get(hit.id).owner.aiActive) {
                 this.battlers.get(hit.id).owner._ai.handleEvent(new GameEvent(BattlerEvent.HIT, {
-                    userId: event.data.get("userId"), item: event.data.get("item"), type: event.data.get("type")
+                    userId: event.data.get("userId"), 
+                    battler: this.battlers.get(event.data.get("userId")),
+                    item: event.data.get("item"), 
+                    type: event.data.get("type")
                 }));
             } else {
                 console.warn(`
