@@ -7,7 +7,7 @@ import GameNode from "../Nodes/GameNode";
  */
 export default class StateMachineAI extends StateMachine implements AI {
 	/**	The GameNode that uses this StateMachine for its AI */
-	protected owner: GameNode;
+	protected _owner: GameNode;
 
 	// @implemented
 	initializeAI(owner: GameNode, config: Record<string, any>): void {}
@@ -15,7 +15,7 @@ export default class StateMachineAI extends StateMachine implements AI {
 	// @implemented
 	destroy(){
 		// Get rid of our reference to the owner
-		delete this.owner;
+		delete this._owner;
 		this.receiver.destroy();
 	}
 

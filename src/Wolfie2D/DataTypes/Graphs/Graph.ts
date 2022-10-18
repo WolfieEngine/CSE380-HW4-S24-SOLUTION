@@ -1,6 +1,6 @@
 import EdgeNode from "./EdgeNode";
 
-export const MAX_V = 100;
+export const MAX_V = 10000;
 
 /**
  * An implementation of a graph data structure using edge lists. Inspired by The Algorithm Design Manual.
@@ -38,8 +38,7 @@ export default class Graph {
 	 * @returns The index of the new node
 	*/
 	addNode(): number {
-		this.numVertices++;
-		return this.numVertices;
+		return this.numVertices++;
 	}
 
 	/** Adds an edge between node x and y, with an optional weight

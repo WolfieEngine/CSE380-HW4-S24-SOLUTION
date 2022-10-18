@@ -31,6 +31,8 @@ export default class NavigationPath {
 		return this.path.isEmpty();
 	}
 
+    next(): Vec2 { return this.path.peek(); }
+
 	/**
 	 * Gets the movement direction in the current position along the path
 	 * @param node The node to move along the path

@@ -45,9 +45,13 @@ export default class Navmesh implements Navigable {
 		// 	i = parent[i];
 		// }
 
-		let parent: number[] = GraphUtils.astar(this.graph, start, end, (node: number) => { 
+		let parent: number[] | null = GraphUtils.astar(this.graph, start, end, (node: number) => { 
 			return this.graph.getNodePosition(node).distanceTo(this.graph.getNodePosition(end)); 
 		});
+
+        if (parent === null) {
+            return new NavigationPath(pathStack);
+        }
 
 		for (let i = parent.length - 1; i >= 0; i--) {
 			pathStack.push(this.graph.positions[parent[i]]);

@@ -111,7 +111,7 @@ export default class GraphUtils {
 			// Iterate through the current node's edge list
 			let edge = g.edges[current]
 
-			while (edge !== null) {
+			while (edge !== null && edge !== undefined) {
 				// Get the neighbor node from the edge
 				let neighbor = edge.y;
 
