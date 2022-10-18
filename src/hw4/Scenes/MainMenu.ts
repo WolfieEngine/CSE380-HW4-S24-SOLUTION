@@ -4,7 +4,7 @@ import Layer from "../../Wolfie2D/Scene/Layer";
 import Scene from "../../Wolfie2D/Scene/Scene";
 import Color from "../../Wolfie2D/Utils/Color";
 import Label from "../../Wolfie2D/Nodes/UIElements/Label";
-import hw4_scene from "./hw4_scene";
+import hw4_scene from "./HW3Scene";
 
 export default class MainMenu extends Scene {
     // Layers, for multiple main menu screens
