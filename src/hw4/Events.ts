@@ -12,5 +12,13 @@ export enum ItemEvent {
 
 export enum HudEvent {
     HEALTH_CHANGE = "HEALTH_CHANGE"
-    
+}
+
+export enum NPCEvent {
+    // An event that gets triggered when an NPC is killed. Has data: {id: number}
+    NPC_KILLED = "NPC_KILLED"
+}
+
+export enum PlayerEvent {
+    PLAYER_KILLED = "PLAYER_KILLED"
 }
