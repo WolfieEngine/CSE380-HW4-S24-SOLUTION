@@ -12,9 +12,9 @@ export default class MainMenu extends Scene {
     private about: Layer;
     private control: Layer;
 
-    loadScene(){}
+    public loadScene(){}
 
-    startScene(){
+    public startScene(){
         const center = this.viewport.getCenter();
 
         // The main menu
@@ -36,15 +36,13 @@ export default class MainMenu extends Scene {
         about.backgroundColor = Color.TRANSPARENT;
         about.onClickEventId = "about";
 
-        /* ########## ABOUT SCREEN ########## */
         this.about = this.addUILayer("about");
         this.about.setHidden(true);
 
         const aboutHeader = <Label>this.add.uiElement(UIElementType.LABEL, "about", {position: new Vec2(center.x, center.y - 250), text: "About"});
         aboutHeader.textColor = Color.WHITE;
 
-        // HOMEWORK 4 - TODO: Give yourself credit and add your name to the about page!
-        const text1 = "This game was created by Zachary Grandison, and Richard McKenna";
+        const text1 = "This game was created by Peter Walsh and Richard McKenna";
         const text2 = "using the Wolfie2D game engine, a TypeScript game engine created by";
         const text3 = "Joe Weaver and Richard McKenna.";
 
@@ -68,28 +66,9 @@ export default class MainMenu extends Scene {
         this.receiver.subscribe("about");
         this.receiver.subscribe("menu");
         this.receiver.subscribe("control");
-
-        // HOMEWORK 4 - TODO
-        /*
-            Add a controls screen here.
-            Use the About screen as inspiration for how to do so.
-            The controls screen should list all controls:
-
-            WASD to move
-            Q to drop an item
-            E to pick up an item
-            Click to use current item
-            1&2 to change items
-            Z to switch to player 1
-            X to switch to player 2
-
-            You should also include a back button to return to the main menu.
-
-            Additionally, on the main menu, you should be able to press a button to reach the controls screen.
-        */
     }
 
-    updateScene(){
+    public updateScene(){
         while(this.receiver.hasNextEvent()){
             let event = this.receiver.getNextEvent();
 

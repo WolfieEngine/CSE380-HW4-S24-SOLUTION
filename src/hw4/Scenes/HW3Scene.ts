@@ -5,7 +5,6 @@ import { GraphicType } from "../../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
 import PositionGraph from "../../Wolfie2D/DataTypes/Graphs/PositionGraph";
 import Navmesh from "../../Wolfie2D/Pathfinding/Navmesh";
-import {hw4_Events, hw4_Names} from "../hw4_constants";
 import AABB from "../../Wolfie2D/DataTypes/Shapes/AABB";
 import BattleManager from "../GameSystems/BattleSystem/BattleManager";
 import HealthbarManager from "../UI/HealthbarManager";
@@ -17,7 +16,6 @@ import LaserGun from "../GameSystems/ItemSystem/ItemTypes/LaserGun";
 import InventoryHUD from "../UI/InventoryHUD";
 import PlayerAI from "../AI/Player/PlayerAI";
 import Inventory from "../GameSystems/ItemSystem/Inventory";
-import { Debugger } from "../Debugger";
 import HealthPack from "../GameSystems/ItemSystem/ItemTypes/HealthPack";
 import Consumable from "../GameSystems/ItemSystem/Items/Consumable";
 
@@ -57,10 +55,14 @@ export default class HW3Scene extends Scene {
     // The position graph for the navmesh
     private graph: PositionGraph;
 
+    // The state of the world/scene that gets passed to the AI - I don't like this, see my comment in the class
     private world: HW3WorldState;
 
 
-    loadScene(){
+    /**
+     * @see Scene.update
+     */
+    public override loadScene(){
         // Load the player and enemy spritesheets
         this.load.spritesheet("player1", "hw4_assets/spritesheets/player1.json");
         this.load.spritesheet("player2", "hw4_assets/spritesheets/player2.json");
@@ -92,8 +94,10 @@ export default class HW3Scene extends Scene {
         this.load.image("pistol", "hw4_assets/sprites/pistol.png");
         
     }
-
-    startScene(){
+    /**
+     * @see Scene.startScene
+     */
+    public override startScene(){
         // Add in the tilemap
         let tilemapLayers = this.add.tilemap("level");
 
@@ -120,7 +124,6 @@ export default class HW3Scene extends Scene {
         // Subscribe to relevant events
         this.receiver.subscribe("healthpack");
         this.receiver.subscribe("enemyDied");
-        this.receiver.subscribe(hw4_Events.UNLOAD_ASSET);
 
         // Add a UI for health
         this.addUILayer("health");
@@ -137,8 +140,10 @@ export default class HW3Scene extends Scene {
         this.receiver.subscribe(PlayerEvent.PLAYER_KILLED);
         this.receiver.subscribe(NPCEvent.NPC_KILLED);
     }
-
-    public updateScene(deltaT: number): void { 
+    /**
+     * @see Scene.updateScene
+     */
+    public override updateScene(deltaT: number): void { 
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }
@@ -148,6 +153,10 @@ export default class HW3Scene extends Scene {
         this.inventoryHud.update(deltaT);
     }
 
+    /**
+     * Handle events from the rest of the game
+     * @param event a game event
+     */
     public handleEvent(event: GameEvent): void {
         switch(event.type) {
             case PlayerEvent.PLAYER_KILLED: {
@@ -164,26 +173,38 @@ export default class HW3Scene extends Scene {
         }
     }
 
+    /**
+     * Handles a player-killed event
+     * @param event a player-killed event
+     */
     protected handlePlayerKilled(event: GameEvent): void {
         this.emitter.fireEvent(GameEventType.CHANGE_SCENE, {scene: GameOver, init: {}});
     }
+    /**
+     * Handles an NPC being killed by unregistering the NPC from the scenes subsystems
+     * @param event an NPC-killed event
+     */
     protected handleNPCKilled(event: GameEvent): void {
         let id: number = event.data.get("id");
         this.battleManager.unregister(id);
         this.itemManager.unregisterInventory(id);
+        this.healthbarManager.unregister(id).destroy();
         this.sceneGraph.getNode(id).destroy();
     }
 
-    initLayers(): void {
+    /** Initializes the layers in the scene */
+    protected initLayers(): void {
         this.addLayer("primary", 10);
         this.addUILayer("slots");
         this.addUILayer("items");
-
         this.getLayer("slots").setDepth(1);
         this.getLayer("items").setDepth(2);
     }
 
-    public initializeSystems(): void {
+    /**
+     * Initialize the scenes main subsystems
+     */
+    protected initializeSystems(): void {
         this.healthbarManager = new HealthbarManager(this, "primary");
         this.inventoryHud = new InventoryHUD(this, 9, 8, new Vec2(232, 24), "items", "inventorySlot", "slots")
         this.itemManager = new ItemManager()
@@ -191,43 +212,60 @@ export default class HW3Scene extends Scene {
         this.world = HW3WorldState.instance();
     }
 
+    /**
+     * Initializes the player in the scene
+     */
     protected initializePlayer(): void {
         this.player = this.add.animatedSprite("player1", "primary");
         this.player.position.set(40, 40);
-        this.player.addPhysics(new AABB(Vec2.ZERO, new Vec2(8, 8)));
 
-        let battler: Battler | null = this.battleManager.register(Battler, this.player, {
+        // Give the player physics
+        this.player.addPhysics(new AABB(Vec2.ZERO, new Vec2(8, 8)));
+        // Create the players Battler object
+        let battler = this.battleManager.register(Battler, this.player, {
             health: 200,
             maxHealth: 200,
             speed: 1,
             group: 0
         });
-        let inventory: Inventory | null = this.itemManager.registerInventory(this.player, []);
-        this.healthbarManager.addHealthbar(this.player, this.player.size.clone());
-
+        // Give the player it's inventory
+        let inventory = this.itemManager.registerInventory(this.player, []);
+        // Give the player a healthbar
+        this.healthbarManager.register(this.player, this.player.size.clone());
+        // Give the player PlayerAI
         this.player.addAI(PlayerAI, {battler: battler, inventory: inventory});
 
+        // Start the player in the "IDLE" animation
         this.player.animation.play("IDLE");
     }
+    /**
+     * Initialize the NPCs 
+     */
     protected initializeNPCs(): void {
-        let enemies: Record<string, any> = this.load.getObject("enemies");
+        let enemies = this.load.getObject("enemies");
         this.npcs = new Array<AnimatedSprite>(enemies.enemies.length);
-        for (let i = 0; i < 8; i++) {
+
+        // Initialize the "Gun Enemies"
+        for (let i = 0; i < 3; i++) {
             this.npcs[i] = this.add.animatedSprite("gun_enemy", "primary");
             this.npcs[i].position.set(enemies.enemies[i][0], enemies.enemies[i][1]);
             this.npcs[i].addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
 
-            let battler: Battler | null = this.battleManager.register(Battler, this.npcs[i], {
-                health: 15,
-                maxHealth: 15,
+            // Give the NPCs their battler objects
+            let battler = this.battleManager.register(Battler, this.npcs[i], {
+                health: 20,
+                maxHealth: 20,
                 speed: 1,
                 group: 1
             });
-            let inventory: Inventory | null = this.itemManager.registerInventory(this.npcs[i], []);
-            this.healthbarManager.addHealthbar(this.npcs[i], this.npcs[i].size.clone());
+            // Give the NPCs their inventories
+            let inventory = this.itemManager.registerInventory(this.npcs[i], []);
+            // Give the NPCS their healthbars
+            this.healthbarManager.register(this.npcs[i], this.npcs[i].size.clone());
+            // Give the NPCs their GOAP 
+            let goap = NPCGoapFactory.buildNPCGoap(NPCGoapType.DEFAULT);
 
-            let goap: GoapObject<NPCGoapAI, NPCAction> = NPCGoapFactory.buildNPCGoap(NPCGoapType.DEFAULT);
-
+            // Give the NPCs their AI
             this.npcs[i].addAI(NPCBehavior, {
                 navkey: "navmesh",
                 battler: battler, 
@@ -235,9 +273,12 @@ export default class HW3Scene extends Scene {
                 goap: goap,
                 world: this.world
             });
+
+            // Play the NPCs "IDLE" animation 
             this.npcs[i].animation.play("IDLE");
         }
 
+        // Initialize the "Healer Enemies"
         for (let i = 8; i < this.npcs.length; i++) {
             this.npcs[i] = this.add.animatedSprite("gun_enemy", "primary");
             this.npcs[i].position.set(enemies.enemies[i][0], enemies.enemies[i][1]);
@@ -250,7 +291,7 @@ export default class HW3Scene extends Scene {
                 group: 1
             });
             let inventory: Inventory | null = this.itemManager.registerInventory(this.npcs[i], []);
-            this.healthbarManager.addHealthbar(this.npcs[i], this.npcs[i].size.clone());
+            this.healthbarManager.register(this.npcs[i], this.npcs[i].size.clone());
 
             let goap: GoapObject<NPCGoapAI, NPCAction> = NPCGoapFactory.buildNPCGoap(NPCGoapType.HEALER);
 
@@ -264,6 +305,9 @@ export default class HW3Scene extends Scene {
             this.npcs[i].animation.play("IDLE");
         }
     }
+    /**
+     * Initialize the items in the scene (healthpacks and laser guns)
+     */
     protected initializeItems(): void {
         let laserguns: Record<string, any> = this.load.getObject("laserguns");
         this.weapons = new Array<Sprite>(laserguns.items.length);
@@ -283,8 +327,14 @@ export default class HW3Scene extends Scene {
 
         let wand: Sprite = this.add.sprite("laserGun", "primary");
         wand.position.set(40, 100);
-        this.itemManager.registerItem(Weapon, wand, new Wand(this, "test want", 0));
+        this.itemManager.registerItem(Weapon, wand, new Wand(this, "test wand", 0));
     }
+    /**
+     * Initializes the navmesh graph used by the NPCs in the HW3Scene. This method is a little buggy, and
+     * and it skips over some of the positions on the tilemap. If you can fix my navmesh generation algorithm,
+     * go for it.
+     * @author PeteyLumpkins
+     */
     protected initializeNavmesh(): void {
         // Add a layer to display the graph
         let gLayer = this.addLayer("graph");
@@ -337,6 +387,6 @@ export default class HW3Scene extends Scene {
 
         // Set this graph as a navigable entity
         let navmesh = new Navmesh(this.graph);
-        this.navManager.addNavigableEntity(hw4_Names.NAVMESH, navmesh);
+        this.navManager.addNavigableEntity("navmesh", navmesh);
     }
 }
