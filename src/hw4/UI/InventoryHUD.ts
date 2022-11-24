@@ -12,19 +12,24 @@ import Updateable from "../../Wolfie2D/DataTypes/Interfaces/Updateable";
 import Item from "../GameSystems/ItemSystem/Items/Item";
 
 /**
- * Manages the player inventory that is displayed in the GameLevel UI
+ * Manages the player inventory that is displayed in the UI. Fun fact, I actually managed to port this
+ * class from my old CSE-380 project from last semester.
+ * @author PeteyLumpkins
  */
 export default class InventoryManager implements Updateable {
 
-    /* Important stuff */
+    /* The scene */
     private scene: Scene;
 
     /* Event handling stuff */
     private receiver: Receiver;
 
-    /* Inventory UI stuff */
+    /* Options for settign the size, padding, and starting position of the UI slots */
     private start: Vec2;
     private padding: number;
+    private size: number;
+
+    /* UI Components for the inventory */
     private itemSlots: Array<Sprite>;
     private itemSlotNums: Array<Label>;
     private itemSprites: Array<Sprite>;
@@ -34,16 +39,15 @@ export default class InventoryManager implements Updateable {
     private itemLayer: string;
     private slotLayer: string;
 
-    private size: number;
 
-    constructor(scene: Scene, size: number, padding: number, start: Vec2, itemLayer: string, slotSprite: string, slotLayer: string) {
+    public constructor(scene: Scene, size: number, padding: number, start: Vec2, itemLayer: string, slotSprite: string, slotLayer: string) {
 
         this.scene = scene;
 
         this.receiver = new Receiver();
-
         this.receiver.subscribe("inv");
 
+        // Set the size and padding for the item slots
         this.size = size;
         this.padding = padding;
         this.start = start;
@@ -82,6 +86,9 @@ export default class InventoryManager implements Updateable {
         }
     }
 
+    /** 
+     * Handles inventory change events from the rest of the game
+     */
     private handleEvent(event: GameEvent): void {
         switch(event.type) {
             case "inv": {
@@ -94,6 +101,10 @@ export default class InventoryManager implements Updateable {
         }
     }
 
+    /**
+     * Loads the items from the array into the inventory UI
+     * @param inv an array of items to updatee the inventory with
+     */
     private loadItems(inv: Array<Item>): void {
         let scale = this.scene.getViewScale();
 
@@ -108,7 +119,7 @@ export default class InventoryManager implements Updateable {
     /**
      * Updates the inventory being displayed in the UI
      */
-    update(deltaT: number): void {
+    public update(deltaT: number): void {
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent())
         }

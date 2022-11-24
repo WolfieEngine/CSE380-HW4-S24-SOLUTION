@@ -5,24 +5,34 @@ import Label from "../../Wolfie2D/Nodes/UIElements/Label";
 import { UIElementType } from "../../Wolfie2D/Nodes/UIElements/UIElementTypes";
 import GameNode from "../../Wolfie2D/Nodes/GameNode";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
-import { Debugger } from "../Debugger";
 
+/**
+ * A UI component that's suppossed to represent a healthbar
+ */
 export default class Healthbar implements Updateable {
 
+    /** The scene and layer in the scene the healthbar is in */
     protected scene: Scene;
     protected layer: string;
 
+    /** The GameNode that owns this healthbar */
     protected owner: GameNode;
+
+    /** The size and offset of the healthbar from it's owner's position */
     protected size: Vec2;
     protected offset: Vec2;
 
+    /** The actual healthbar (the part with color) */
     protected healthBar: Label;
+    /** The healthbars background (the part with the border) */
     protected healthBarBg: Label;
 
+    /** The current health of the owner */
     protected curhp: number;
+    /** The maximum health of the owner */
     protected maxhp: number;
 
-    constructor(scene: Scene, layer: string, size: Vec2, offset: Vec2, owner: GameNode) {
+    public constructor(scene: Scene, layer: string, size: Vec2, offset: Vec2, owner: GameNode) {
         this.scene = scene;
         this.layer = layer;
         this.owner = owner;
@@ -44,7 +54,11 @@ export default class Healthbar implements Updateable {
         this.healthBarBg.size.copy(size);
     }
 
-    update(deltaT: number): void {
+    /**
+     * Updates the healthbars position according to the position of it's owner
+     * @param deltaT 
+     */
+    public update(deltaT: number): void {
         
         this.healthBar.position.copy(this.owner.position).add(this.offset);
         this.healthBarBg.position.copy(this.owner.position).add(this.offset);
@@ -60,12 +74,29 @@ export default class Healthbar implements Updateable {
 		this.healthBar.backgroundColor = this.curhp < this.maxhp * 1/4 ? Color.RED : this.curhp < this.maxhp * 3/4 ? Color.YELLOW : Color.GREEN;
     }
 
+    /**
+     * When the owner's health changes, this methods gets called by the healthbars mananger 
+     * to update the current and maximum health values.
+     * @param curhp 
+     * @param maxhp 
+     */
     public updateHealthBar(curhp: number, maxhp: number): void {
-        Debugger.print("health", `Recieved a health change event! Owner id: ${this.owner.id} Curhp: ${curhp} Maxhp: ${maxhp}`);
         if (curhp !== this.curhp || maxhp !== this.maxhp) {
             this.curhp = curhp;
             this.maxhp = maxhp;
         }
+    }
+
+    /**
+     * Destroys the healthbar and all of it's assets
+     */
+    public destroy(): void {
+        this.healthBar.destroy();
+        this.healthBarBg.destroy();
+        this.size = null;
+        this.offset = null;
+        this.scene = null;
+        this.owner = null;
     }
 
 }
