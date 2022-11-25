@@ -27,24 +27,30 @@ export default class NPCGoapAI extends StateMachineAI implements AI {
     protected _battler: Battler;
     /** The Inventory object associated with this NPC */
     protected _inventory: Inventory;
-    /** The GoapObject that kind of owns this NPCGoapAI - it does the heavy lifting */
+    /** The GoapObject that kind of owns this NPCGoapAI - in terms of GOAP, it does the heavy lifting */
     protected _goap: GoapObject<NPCGoapAI, NPCAction>;
     /** The state of the world */
     protected _world: HW3WorldState;
 
+    /** Initialize the NPC AI */
     initializeAI(owner: GameNode, opts: Record<string, any>): void {
         this._owner = owner;
         this._navkey = opts.navkey;
         this._battler = opts.battler;
         this._inventory = opts.inventory;
 
+        // Initialize the GOAP object for the NPC
         this._goap = opts.goap;
         this._goap.initialize(this);
 
+        // Set the HW3WWorldState
         this._world = opts.world;
 
+        // Add the Active and Dead states to the NPC
         this.addState(NPCStateType.ACTIVE, new Active(this))
         this.addState(NPCStateType.DEAD, new Dead(this));
+
+        // Set the initial state of the NPC to active
         this.initialize(NPCStateType.ACTIVE);
     }
 
@@ -52,18 +58,6 @@ export default class NPCGoapAI extends StateMachineAI implements AI {
 
     activate(options: Record<string, any>): void {}
 
-    /**
-     * First, the update method makes a call to super.update(). Calling the super.update() method will
-     * trigger the current state of the AIs StateMachine to update.
-     * 
-     * Next, the update method attempts to perform the next action in the Goap AIs plan. If the plan is 
-     * empty, a new plan is created.
-     * 
-     * If the action the AI attempts to perform is successful, the AI will add the effects of successfully
-     * performing the action to the AIs current statuses and pop the action from it's current action plan.
-     * 
-     * @param deltaT the amount of time elapsed since the last update cycle
-     */
     public update(deltaT: number): void {
         super.update(deltaT);
     }
@@ -96,7 +90,7 @@ export default class NPCGoapAI extends StateMachineAI implements AI {
     get actions(): NPCAction[] { return Array.from(this._goap.actions()); }
     get status(): string[] { return Array.from(this._goap.statuses()); }
 
-    /** World State */
+    /** The HW3WorldState */
     get world(): HW3WorldState { return this._world; }
 
     /** Checks if the NPC can see a target */

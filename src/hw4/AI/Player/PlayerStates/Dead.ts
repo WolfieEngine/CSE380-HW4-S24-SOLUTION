@@ -13,7 +13,6 @@ export default class Dead extends PlayerState {
      * that the player is officially dead.
      */
     onEnter(options: Record<string, any>): void {
-        console.log("Player killed!");
         this.emitter.fireEvent(PlayerEvent.PLAYER_KILLED);
     }
 

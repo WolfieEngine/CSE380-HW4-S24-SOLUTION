@@ -6,7 +6,7 @@ import GameNode from "../../../Wolfie2D/Nodes/GameNode";
 import Emitter from "../../../Wolfie2D/Events/Emitter";
 import BattlerType from "./BattlerType";
 import { ItemEvent, BattlerEvent } from "../../Events";
-import ConsumableType from "../ItemSystem/ItemTypes/ConsumableType";
+
 
 export default class BattleManager implements Updateable {
     protected battlers: Map<number, Battler>;

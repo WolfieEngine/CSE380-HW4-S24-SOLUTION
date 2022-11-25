@@ -3,16 +3,28 @@ import GameNode from "../../../Wolfie2D/Nodes/GameNode";
 import { ItemEvent } from "../../Events";
 import Item from "./Items/Item";
 
+/**
+ * An inventory is a collection of items. All items in the inventory must be registered with
+ * the Inventorys ItemManager class. 
+ */
 export default class Inventory {
 
+    /** The GameNode that owns this inventory */
     protected _owner: GameNode;
+
+    /** A flag indicating whether the */
     protected _dirty: boolean;
+
+    /** The maximum number of items this inventory can hold */
     protected _cap: number;
+
+    /** The number of items in this inventory */
     protected _size: number;
 
+    /** The collection of items in the inventory */
     protected inv: Map<number, Item>;
 
-    constructor(owner: GameNode, items: Array<Item> = [], cap: number = 9) {
+    public constructor(owner: GameNode, items: Array<Item> = [], cap: number = 9) {
         this._owner = owner;
         this._size = 0;
         this._cap = cap;
@@ -20,8 +32,8 @@ export default class Inventory {
         items.forEach(item => item.pickup(this));
     }
 
-    get owner(): GameNode { return this._owner; }
-    get dirty(): boolean { return this._dirty; }
+    public get owner(): GameNode { return this._owner; }
+    public get dirty(): boolean { return this._dirty; }
     protected set dirty(dirty: boolean) { this._dirty = dirty; }
 
     /**
@@ -52,10 +64,20 @@ export default class Inventory {
         return item;
     }
 
+    /**
+     * Checks if an item with the given id number exists in this inventory.
+     * @param id the id of the item in the inventory
+     * @returns true if the item with the id exists; false otherwise
+     */
     has(id: number): boolean { 
         return this.inv.has(id);
     }
 
+    /**
+     * Removes the item with the given id number from this inventory
+     * @param id the id of the item
+     * @returns the item that was removed or null 
+     */
     remove(id: number): Item | null { 
         if (!this.has(id)) {
             return null;
@@ -67,15 +89,28 @@ export default class Inventory {
         return item;
     }
 
+    /**
+     * Finds the first item in this inventory that meets the given condition.
+     * @param pred the predicate function (the condition)
+     * @returns 
+     */
     find(pred: (item: Item) => boolean): Item | null {
        let item: Item = Array.from(this.inv.values()).find(pred);
        return item === undefined ? null : item;
     }
 
+    /**
+     * Finds and returns all Items in the Inventory that meet the given condition
+     * @param pred the predicate function
+     * @returns a list of Items
+     */
     findAll(pred: (item: Item) => boolean): Item[] | [] {
         return Array.from(this.inv.values()).filter(pred);
     }
-
+    /**
+     * Applies the given function to each item in the Inventory
+     * @param func the function
+     */
     forEach(func: (item: Item) => void): void {
         for (let item of this.inv.values()) {
             func(item);

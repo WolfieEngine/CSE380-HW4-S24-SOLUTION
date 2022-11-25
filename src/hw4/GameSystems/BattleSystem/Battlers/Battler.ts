@@ -8,10 +8,8 @@ import LaserGun from "../../ItemSystem/ItemTypes/LaserGun";
 import Item from "../../ItemSystem/Items/Item";
 import Weapon from "../../ItemSystem/Items/Weapon";
 
-import { Debugger } from "../../../Debugger";
 import { BattlerEvent } from "../../../Events";
 import MathUtils from "../../../../Wolfie2D/Utils/MathUtils";
-import BattleManager from "../BattleManager";
 import HealthPack from "../../ItemSystem/ItemTypes/HealthPack";
 
 export default class Battler {
@@ -36,10 +34,8 @@ export default class Battler {
     }
 
     public clean(): void {
-        Debugger.print("battler", `Cleaning battler with owner id: ${this.owner.id}. Owner `)
         this._dirty = false;
         if (this.owner.aiActive) {
-            Debugger.print("battler", `Sending event with type BATTLER_CHANGED to this battlers AI`);
             this.owner._ai.handleEvent(new GameEvent(BattlerEvent.BATTLER_CHANGE));
         }
     }
@@ -78,7 +74,6 @@ export default class Battler {
         let item: Item = event.data.get("item");
         switch(item.constructor) {
             case Weapon: {
-                Debugger.print("battler", "Handling a weapon hit!");
                 this.handleWeaponHit(event);
                 break;
             }
@@ -91,9 +86,7 @@ export default class Battler {
         let type: WeaponType = event.data.get("type");
         switch(type.constructor) {
             case LaserGun: {
-                Debugger.print("battler", "Handling a laser gun hit!");
                 if (event.data.get("userId") !== this.owner.id) {
-                    Debugger.print("battler", "Battler taking damage from a laser gun!");
                     this.health -= type.damage;
                 }
                 break;
@@ -107,7 +100,6 @@ export default class Battler {
         let type: ConsumableType = event.data.get("type");
         switch(type.constructor) {
             case HealthPack: {
-                Debugger.print("battler", "Handling consuming a healthpack!");
                 let effects = event.data.get("effects");
                 let health: number = effects.health;
                 this.health += health;

@@ -2,9 +2,9 @@ import Vec2 from "../../../../Wolfie2D/DataTypes/Vec2";
 import Emitter from "../../../../Wolfie2D/Events/Emitter";
 import Sprite from "../../../../Wolfie2D/Nodes/Sprites/Sprite";
 import Layer from "../../../../Wolfie2D/Scene/Layer";
-import { Debugger } from "../../../Debugger";
 import Inventory from "../Inventory";
 import ItemType from "../ItemTypes/ItemType";
+
 
 export default abstract class Item {
     /** The sprite that represents this weapon in the world */
@@ -23,6 +23,11 @@ export default abstract class Item {
         this.emitter = new Emitter();
     }
 
+    /**
+     * Adds an item to the given inventory
+     * @param inv the inventory to add the item to
+     * @returns the item if it was added to the inventory; null otherwise
+     */
     public pickup(inv: Inventory): Item | null {
         if (this.inv !== null) {
             return null;
@@ -32,7 +37,12 @@ export default abstract class Item {
         this.owner.visible = false;
         return this.inv.add(this);
     }
-
+    /**
+     * Drops the item at the given position in the given layer
+     * @param position the position to drop the item at
+     * @param layer the layer to drop the item in
+     * @returns the item that was dropped; null if something went wrong
+     */
     public drop(position: Vec2, layer: Layer): Item | null { 
         if (this.inv === null) {
             return null;
@@ -48,6 +58,11 @@ export default abstract class Item {
         return this;
     }
 
+    /**
+     * Moves an item from it's current inventory to another inventory
+     * @param des the destination inventory to move the item to
+     * @returns the item that was moved; null if something went wrong
+     */
     public move(des: Inventory): Item | null {
         if (this.inv === null) {
             return null
@@ -57,6 +72,9 @@ export default abstract class Item {
         return this;
     }
 
+    /**
+     * Destroys this item
+     */
     public destroy(): void { 
         if (this.inv !== null) this.inv.remove(this.owner.id)
         this.inv = null;

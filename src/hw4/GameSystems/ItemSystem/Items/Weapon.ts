@@ -5,14 +5,14 @@ import Item from "./Item";
 import WeaponType from "../ItemTypes/WeaponType";
 import Emitter from "../../../../Wolfie2D/Events/Emitter";
 import { ItemEvent } from "../../../Events";
-import { Debugger } from "../../../Debugger";
+
 
 export default class Weapon extends Item {
     
     protected _type: WeaponType;
     protected emitter: Emitter;
     
-    constructor(owner: Sprite, type: WeaponType){
+    public constructor(owner: Sprite, type: WeaponType){
         super(owner, type);
         this.type = type;
         this.emitter = new Emitter();
@@ -20,7 +20,6 @@ export default class Weapon extends Item {
     }
 
     public override use(user: GameNode, dir: Vec2): void {
-        Debugger.print("item", `Using weapon type ${this.type.constructor}! User id: ${user.id} Direction: ${dir}`);
         let hits: Array<GameNode> = this.type.hits(user, dir);
         this.type.animate(user, dir);
         this.emitter.fireEvent(ItemEvent.WEAPON_USED, {userId: user.id, item: this, type: this.type, hits: hits});

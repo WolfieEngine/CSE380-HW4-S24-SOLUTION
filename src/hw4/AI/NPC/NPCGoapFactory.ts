@@ -22,6 +22,7 @@ import UseProjectileWeapon from "./NPCActions/UseItemActions/UseLaserGun";
 import TargetLowHealthAlly from "./NPCActions/TargetActions/TargetAlly/LowHealth";
 import NPCGoapAI from "./NPCGoapAI";
 import HealSelf from "./NPCActions/UseItemActions/UseHealthpack/HealSelf";
+import { TargetClosestVisibleEnemy } from "./NPCActions/TargetActions/TargetEnemy";
 
 
 export default class NPCFactory {
@@ -78,7 +79,7 @@ export default class NPCFactory {
         actions.add(new TargetClosestLaserGun(1, [], ["target_laser_gun"]));
         actions.add(new GotoFirstSeen(1, ["target_laser_gun"], ["at_laser_gun"]));
         actions.add(new PickupLaserGun(10, ["at_laser_gun", "target_laser_gun"], ["has_weapon", "has_laser_gun", "goal"]));
-        actions.add(new TargetVisibleEnemy(1, ["has_weapon"], ["target_enemy"]))
+        actions.add(new TargetClosestVisibleEnemy(1, ["has_weapon"], ["target_enemy"]))
         actions.add(new GotoLastSeen(1, ["target_enemy", "has_laser_gun"], ["at_enemy"]))
         actions.add(new UseProjectileWeapon(1, ["has_laser_gun", "at_enemy"], ["goal"]))
         return actions;

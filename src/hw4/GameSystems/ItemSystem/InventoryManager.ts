@@ -1,29 +1,48 @@
-import Receiver from "../../../Wolfie2D/Events/Receiver";
+import Updateable from "../../../Wolfie2D/DataTypes/Interfaces/Updateable";
 import GameNode from "../../../Wolfie2D/Nodes/GameNode";
 import Inventory from "./Inventory";
 import Item from "./Items/Item";
 
-export default class InventoryManager {
+/**
+ * A class for managing a set of Inventory objects in an ItemManager
+ */
+export default class InventoryManager implements Updateable {
 
+    /** A mapping of unique ids to Inventory objects */
     protected inventories: Map<number, Inventory>;
-    protected receiver: Receiver;
 
     public constructor() { 
         this.inventories = new Map<number, Inventory>(); 
     }
 
+    /**
+     * Updates this InventoryManager and all inventories in the InventoryManager if they have changed
+     * since the last frame.
+     * @param deltaT 
+     */
     public update(deltaT: number): void {
         this.inventories.forEach((inv: Inventory) => {
             if (inv.dirty) inv.clean();
         });
     }
 
+    /**
+     * Gets the inventory associated with the GameNode with the given id if it exists
+     * @param id the id of the GameNode
+     * @returns the inventory associated with the given id or null
+     */
     public get(id: number): Inventory | null {
         if (!this.has(id)) {
             return null
         }
         return this.inventories.get(id);
     }
+
+    /**
+     * Checks if the GameNode with the given id has an inventory in this InventoryManager.
+     * @param id the id of the inventory
+     * @returns true if the GameNode has an inventory in this InventoryManager; false otherwise
+     */
     public has(id: number): boolean {
         return this.inventories.has(id);
     }
@@ -43,6 +62,11 @@ export default class InventoryManager {
         return inv;
     }
 
+    /**
+     * Unregisters a GameNode from an inventory of items in this InventoryManager.
+     * @param id the id of the GameNode
+     * @returns the inventory of the GameNode or null
+     */
     public unregister(id: number): Inventory | null {
         let inv: Inventory | null = this.inventories.get(id);
         if (inv === null) return null;

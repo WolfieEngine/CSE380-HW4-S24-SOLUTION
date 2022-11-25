@@ -8,6 +8,9 @@ import GameEvent from "../../../Wolfie2D/Events/GameEvent";
 import ItemType from "./ItemTypes/ItemType";
 import Sprite from "../../../Wolfie2D/Nodes/Sprites/Sprite";
 
+/**
+ * A manager class for managing a set of Item objects and a set of Inventory objects
+ */
 export default class ItemManager implements Updateable {
 
     protected receiver: Receiver;
@@ -95,7 +98,6 @@ export default class ItemManager implements Updateable {
         if (item === null) return console.log(`No items found in pickup range of inventory owners position`);
 
         item.pickup(inventory);
-        console.log(inventory);
     }
 
     public handleDrop(event: GameEvent): void {
@@ -107,6 +109,5 @@ export default class ItemManager implements Updateable {
         if (item === undefined || item === null) return console.log(`Owner with id ${ownerId} does not have any items they can drop`);
 
         item.drop(inventory.owner.position, inventory.owner.getLayer());
-        console.log(inventory);
     }
 }

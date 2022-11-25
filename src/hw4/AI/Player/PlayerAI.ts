@@ -12,14 +12,13 @@ import { Idle, Invincible, Moving, Dead, PlayerStateType } from "./PlayerStates/
 
 /**
  * The AI that controls the player. The players AI has been configured as a Finite State Machine (FSM)
- * with 4 states; idle, moving, invincible, dead.
- * 
+ * with 4 states; Idle, Moving, Invincible, and Dead.
  */
 export default class PlayerAI extends StateMachineAI implements AI {
 
     /** The GameNode that owns this AI */
     public owner: AnimatedSprite;
-    /**  */
+    /** A set of controls for the player */
     public controller: PlayerController;
     /** The battler object associated with the player */
     public battler: Battler;
@@ -36,10 +35,13 @@ export default class PlayerAI extends StateMachineAI implements AI {
         this.inventory = opts.inventory;
         this.item = this.inventory[0] ? this.inventory[0] : null;
 
+        // Add the players states to it's StateMachine
         this.addState(PlayerStateType.IDLE, new Idle(this));
         this.addState(PlayerStateType.INVINCIBLE, new Invincible(this));
         this.addState(PlayerStateType.MOVING, new Moving(this));
         this.addState(PlayerStateType.DEAD, new Dead(this));
+        
+        // Initialize the players state to Idle
         this.initialize(PlayerStateType.IDLE);
     }
 
