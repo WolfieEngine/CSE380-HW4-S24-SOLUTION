@@ -1,6 +1,6 @@
 import Item from "../../../../../GameSystems/ItemSystem/Items/Item";
 import HealthPack from "../../../../../GameSystems/ItemSystem/ItemTypes/HealthPack";
-import { GoapActionStatus } from "../../../../../GameSystems/GoapSystem/GoapAction";
+import { GoapActionStatus } from "../../../../../../Wolfie2D/DataTypes/Goap/GoapAction";
 import NPCGoapAI from "../../../NPCGoapAI";
 import UseItemAction from "../UseItemAction";
 

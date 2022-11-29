@@ -1,6 +1,6 @@
 import Item from "../../../../GameSystems/ItemSystem/Items/Item";
 import LaserGun from "../../../../GameSystems/ItemSystem/ItemTypes/LaserGun";
-import { GoapActionStatus } from "../../../../GameSystems/GoapSystem/GoapAction";
+import { GoapActionStatus } from "../../../../../Wolfie2D/DataTypes/Goap/GoapAction";
 import NPCGoapAI from "../../NPCGoapAI";
 import UseItemAction from "./UseItemAction";
 import Timer from "../../../../../Wolfie2D/Timing/Timer";

@@ -1,7 +1,9 @@
-import GoapAction, { GoapActionStatus } from "../../../GameSystems/GoapSystem/GoapAction"
-import AI from "../../../../Wolfie2D/DataTypes/Interfaces/AI";
+import GoapAction, { GoapActionStatus } from "../../../../Wolfie2D/DataTypes/Goap/GoapAction";
 import NPCGoapAI from "../NPCGoapAI";
 
+/**
+ * An abstract GoapAction for an NPCGoapAI
+ */
 export default abstract class NPCAction implements GoapAction {
 
     protected _cost: number;
@@ -18,9 +20,17 @@ export default abstract class NPCAction implements GoapAction {
     abstract reset(ai: NPCGoapAI): void;
     abstract update(ai: NPCGoapAI): void;
     
+    /**
+     * Checks the current status of the NPCGoapAI against this actions preconditions
+     * @param ai the NPCGoapAI that will be performing the action
+     * @param statuses the status of the NPCGoapAI
+     * @returns true if the NPC satisfies the preconditions to perform the action; false otherwise
+     */
     public checkPreconditions(ai: NPCGoapAI, statuses: string[]): boolean { 
         return this.preconditions.every(status => statuses.includes(status));
     }
+
+    /** Getters and setters for the cost, preconditions, and effects */
 
     public get cost(): number { return this._cost; }
     public get preconditions(): string[] { return this._preconditions; }

@@ -6,7 +6,7 @@ import GameNode from "../../../Wolfie2D/Nodes/GameNode";
 import NavigationPath from "../../../Wolfie2D/Pathfinding/NavigationPath";
 import Battler from "../../GameSystems/BattleSystem/Battlers/Battler";
 import Inventory from "../../GameSystems/ItemSystem/Inventory";
-import GoapObject from "../../GameSystems/GoapSystem/GoapObject";
+import GoapObject from "../../../Wolfie2D/AI/Goap/GoapObject";
 import NPCAction from "./NPCActions/NPCAction";
 import HW3WorldState from "../../GameSystems/WorldState";
 import AABB from "../../../Wolfie2D/DataTypes/Shapes/AABB";
@@ -29,7 +29,7 @@ export default class NPCGoapAI extends StateMachineAI implements AI {
     protected _inventory: Inventory;
     /** The GoapObject that kind of owns this NPCGoapAI - in terms of GOAP, it does the heavy lifting */
     protected _goap: GoapObject<NPCGoapAI, NPCAction>;
-    /** The state of the world */
+    /** The state of the world - TODO: I don't like this @see HW3WorldState */
     protected _world: HW3WorldState;
 
     /** Initialize the NPC AI */
@@ -87,8 +87,8 @@ export default class NPCGoapAI extends StateMachineAI implements AI {
     /** Goap Interface */
     get goap(): GoapObject<NPCGoapAI, NPCAction> { return this._goap; }
     get goal(): string { return this._goap.goal; }
-    get actions(): NPCAction[] { return Array.from(this._goap.actions()); }
-    get status(): string[] { return Array.from(this._goap.statuses()); }
+    get actions(): NPCAction[] { return Array.from(this._goap.actions); }
+    get status(): string[] { return Array.from(this._goap.statuses); }
 
     /** The HW3WorldState */
     get world(): HW3WorldState { return this._world; }

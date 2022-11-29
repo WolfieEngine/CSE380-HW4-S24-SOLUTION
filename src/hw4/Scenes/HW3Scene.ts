@@ -23,7 +23,7 @@ import HW3WorldState from "../GameSystems/WorldState";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
 
 import NPCAction from "../AI/NPC/NPCActions/NPCAction";
-import GoapObject from "../GameSystems/GoapSystem/GoapObject";
+import GoapObject from "../../Wolfie2D/AI/Goap/GoapObject";
 import NPCGoapAI from "../AI/NPC/NPCGoapAI";
 import NPCGoapFactory, { NPCGoapType } from "../AI/NPC/NPCGoapFactory";
 

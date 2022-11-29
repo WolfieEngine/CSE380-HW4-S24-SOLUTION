@@ -1,4 +1,4 @@
-import { GoapActionStatus } from "../../../GameSystems/GoapSystem/GoapAction";
+import { GoapActionStatus } from "../../../../Wolfie2D/DataTypes/Goap/GoapAction";
 import NPCGoapAI from "../NPCGoapAI";
 import NPCAction from "./NPCAction";
 
@@ -7,8 +7,6 @@ import NPCAction from "./NPCAction";
  * to do nothing.
  */
 export default class IdleAction extends NPCAction {
-
-    start(ai: NPCGoapAI): void { }
 
     update(ai: NPCGoapAI): void { }
 

@@ -24,10 +24,10 @@ export enum NPCStateType {
  */
 export default abstract class NPCState extends State {
 
-    // The parent NPC behavior
+    /** The parent NPC AI */
     protected parent: NPCGoapAI;
 
-    constructor(parent: NPCGoapAI) {
+    public constructor(parent: NPCGoapAI) {
         super(parent);
     }
 
@@ -127,7 +127,7 @@ export default abstract class NPCState extends State {
                 if (event.data.get("userId") !== this.parent.owner.id) {
                     let battler: Battler = event.data.get("battler");
                     this.parent.battler.group = battler.group;
-                    this.parent.goap.restart();
+                    this.parent.goap.getNewPlan();
                 }
                 break;
             }

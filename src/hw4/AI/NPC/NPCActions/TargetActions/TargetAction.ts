@@ -1,6 +1,6 @@
 import Vec2 from "../../../../../Wolfie2D/DataTypes/Vec2";
 import GameNode from "../../../../../Wolfie2D/Nodes/GameNode";
-import { GoapActionStatus } from "../../../../GameSystems/GoapSystem/GoapAction";
+import { GoapActionStatus } from "../../../../../Wolfie2D/DataTypes/Goap/GoapAction";
 import NPCGoapAI from "../../NPCGoapAI";
 import NPCAction from "../NPCAction";
 

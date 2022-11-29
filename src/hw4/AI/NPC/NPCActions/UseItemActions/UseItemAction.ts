@@ -1,8 +1,11 @@
-import { GoapActionStatus } from "../../../../GameSystems/GoapSystem/GoapAction";
+import { GoapActionStatus } from "../../../../../Wolfie2D/DataTypes/Goap/GoapAction";
 import Item from "../../../../GameSystems/ItemSystem/Items/Item";
 import NPCGoapAI from "../../NPCGoapAI";
 import NPCAction from "../NPCAction";
 
+/**
+ * Another abstract NPCAction for using an item.
+ */
 export default abstract class UseItemAction extends NPCAction {
 
     protected item: Item | null = null;

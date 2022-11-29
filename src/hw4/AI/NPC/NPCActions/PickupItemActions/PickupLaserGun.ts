@@ -1,5 +1,4 @@
 import Item from "../../../../GameSystems/ItemSystem/Items/Item";
-import LaserGun from "../../../../GameSystems/ItemSystem/ItemTypes/LaserGun";
 import NPCGoapAI from "../../NPCGoapAI";
 import PickupItemAction from "./PickupAction";
 

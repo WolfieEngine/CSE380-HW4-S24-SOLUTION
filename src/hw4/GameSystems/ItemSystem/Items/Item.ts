@@ -78,7 +78,6 @@ export default abstract class Item {
     public destroy(): void { 
         if (this.inv !== null) this.inv.remove(this.owner.id)
         this.inv = null;
-        this.owner.destroy();
     }
 
     public get owner(): Sprite { return this._owner; }

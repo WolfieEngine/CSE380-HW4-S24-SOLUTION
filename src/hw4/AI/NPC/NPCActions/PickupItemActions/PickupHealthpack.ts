@@ -1,5 +1,4 @@
 import Item from "../../../../GameSystems/ItemSystem/Items/Item";
-import HealthPack from "../../../../GameSystems/ItemSystem/ItemTypes/HealthPack";
 import NPCGoapAI from "../../NPCGoapAI";
 import PickupItemAction from "./PickupAction";
 

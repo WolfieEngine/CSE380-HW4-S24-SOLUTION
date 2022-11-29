@@ -2,7 +2,6 @@ import Vec2 from "../../../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../../../Wolfie2D/Events/GameEvent";
 import { PlayerAnimationType, PlayerStateType } from "./PlayerState";
 import PlayerState from "./PlayerState";
-import { Debugger } from "../../../Debugger";
 
 export default class Idle extends PlayerState {
 
