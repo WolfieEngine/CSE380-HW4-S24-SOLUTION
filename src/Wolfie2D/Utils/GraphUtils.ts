@@ -151,5 +151,5 @@ export default class GraphUtils {
 		}
 		path.reverse();
 		return path;
-	}
+	}    
 }

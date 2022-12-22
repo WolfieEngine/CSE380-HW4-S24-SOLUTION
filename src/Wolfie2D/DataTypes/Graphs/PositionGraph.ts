@@ -86,6 +86,28 @@ export default class PositionGraph extends Graph implements DebugRenderable {
 		return "Node " + index + " - " + this.positions[index].toString();
 	}
 
+    /**
+     * Finds the node in the graph with the position closest to the given position
+     * @param position the position
+     * @returns the node in the graph that is closest to the given position
+     */
+    public snap(position: Vec2): number {
+        let n = this.numVertices;
+		let i = 1;
+		let index = 0;
+		let dist = position.distanceSqTo(this.positions[0]);
+		while(i < n){
+			let d = position.distanceSqTo(this.positions[i]);
+			if(d < dist){
+				dist = d;
+				index = i;
+			}
+			i++;
+		}
+
+		return index;
+    }
+
 	debugRender = (): void => {
 		// for(let point of this.positions){
 		// 	ctx.fillRect((point.x - origin.x - 4)*zoom, (point.y - origin.y - 4)*zoom, 8, 8);
