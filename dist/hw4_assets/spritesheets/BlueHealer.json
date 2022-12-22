@@ -1,6 +1,6 @@
 {
-    "name": "TopdownEnemy4",
-    "spriteSheetImage": "custom_enemy1.png",
+    "name": "BlueHealer",
+    "spriteSheetImage": "BlueHealer.png",
     "spriteWidth": 16,
     "spriteHeight": 16,
     "columns": 5,

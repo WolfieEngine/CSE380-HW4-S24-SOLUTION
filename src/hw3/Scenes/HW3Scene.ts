@@ -33,6 +33,10 @@ import GameOver from "./GameOver";
 import Battler from "../GameSystems/BattleSystem/Battlers/Battler";
 import Wand from "../GameSystems/ItemSystem/ItemTypes/Wand";
 
+import AstarStrategy from "../Pathfinding/AstarStrategy";
+import DjikstraStrategy from "../../Wolfie2D/Pathfinding/Strategies/DjikstraStrategy";
+import DirectStrategy from "../../Wolfie2D/Pathfinding/Strategies/DirectStrategy";
+
 
 export default class HW3Scene extends Scene {
 
@@ -44,7 +48,13 @@ export default class HW3Scene extends Scene {
 
     /** GameNodes in the HW3 Scene */
     private player: AnimatedSprite;
-    private npcs: Array<AnimatedSprite>;
+
+    private redEnemies: Array<AnimatedSprite>;
+    private blueEnemies: Array<AnimatedSprite>;
+
+    private redHealers: Array<AnimatedSprite>;
+    private blueHealers: Array<AnimatedSprite>;
+
     private consumables: Array<Sprite>;
     private weapons: Array<Sprite>
 
@@ -59,39 +69,33 @@ export default class HW3Scene extends Scene {
 
 
     /**
-     * @see Scene.update
+     * @see Scene.update()
      */
     public override loadScene(){
         // Load the player and enemy spritesheets
         this.load.spritesheet("player1", "hw4_assets/spritesheets/player1.json");
-        this.load.spritesheet("player2", "hw4_assets/spritesheets/player2.json");
 
-        this.load.spritesheet("gun_enemy", "hw4_assets/spritesheets/gun_enemy.json");
-        this.load.spritesheet("knife_enemy", "hw4_assets/spritesheets/knife_enemy.json");
-        this.load.spritesheet("custom_enemy1", "hw4_assets/spritesheets/custom_enemy1.json");
-        this.load.spritesheet("custom_enemy2", "hw4_assets/spritesheets/custom_enemy2.json");
-
-        this.load.spritesheet("slice", "hw4_assets/spritesheets/slice.json");
+        // Load in the enemy sprites
+        this.load.spritesheet("BlueEnemy", "hw4_assets/spritesheets/BlueEnemy.json");
+        this.load.spritesheet("RedEnemy", "hw4_assets/spritesheets/RedEnemy.json");
+        this.load.spritesheet("BlueHealer", "hw4_assets/spritesheets/BlueHealer.json");
+        this.load.spritesheet("RedHealer", "hw4_assets/spritesheets/RedHealer.json");
 
         // Load the tilemap
-        // HOMEWORK 4 - TODO
-        // Change this file to be your own tilemap
-        this.load.tilemap("level", "hw4_assets/tilemaps/HW3Map2.json");
+        this.load.tilemap("level", "hw4_assets/tilemaps/HW3Tilemap.json");
 
-        this.load.object("enemies", "hw4_assets/data/enemies.json")
-        this.load.object("healthpacks", "hw4_assets/data/healthpacks.json");
-        this.load.object("laserguns", "hw4_assets/data/laserguns.json");
+        // Load the enemy locations
+        this.load.object("red", "hw4_assets/data/enemies/red.json");
+        this.load.object("blue", "hw4_assets/data/enemies/blue.json");
 
-        // Load the nav mesh
-        this.load.object("navmesh", "hw4_assets/data/navmesh3.json");
+        // Load the healthpack and lasergun loactions
+        this.load.object("healthpacks", "hw4_assets/data/items/healthpacks.json");
+        this.load.object("laserguns", "hw4_assets/data/items/laserguns.json");
 
-        // Load the healthpack sprite
+        // Load the healthpack, inventory slot, and laser gun sprites
         this.load.image("healthpack", "hw4_assets/sprites/healthpack.png");
         this.load.image("inventorySlot", "hw4_assets/sprites/inventory.png");
-        this.load.image("knife", "hw4_assets/sprites/knife.png");
         this.load.image("laserGun", "hw4_assets/sprites/laserGun.png");
-        this.load.image("pistol", "hw4_assets/sprites/pistol.png");
-        
     }
     /**
      * @see Scene.startScene
@@ -241,31 +245,33 @@ export default class HW3Scene extends Scene {
      * Initialize the NPCs 
      */
     protected initializeNPCs(): void {
-        let enemies = this.load.getObject("enemies");
-        this.npcs = new Array<AnimatedSprite>(enemies.enemies.length);
 
-        // Initialize the "Gun Enemies"
-        for (let i = 0; i < 3; i++) {
-            this.npcs[i] = this.add.animatedSprite("gun_enemy", "primary");
-            this.npcs[i].position.set(enemies.enemies[i][0], enemies.enemies[i][1]);
-            this.npcs[i].addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
+        // Get the object data for the red enemies
+        let red = this.load.getObject("red");
+
+        // Initialize the red enemies
+        this.redEnemies = new Array<AnimatedSprite>(red.enemies.length);
+        for (let i = 0; i < red.enemies.length; i++) {
+            this.redEnemies[i] = this.add.animatedSprite("RedEnemy", "primary");
+            this.redEnemies[i].position.set(red.enemies[i][0], red.enemies[i][1]);
+            this.redEnemies[i].addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
 
             // Give the NPCs their battler objects
-            let battler = this.battleManager.register(Battler, this.npcs[i], {
+            let battler = this.battleManager.register(Battler, this.redEnemies[i], {
                 health: 20,
                 maxHealth: 20,
                 speed: 1,
                 group: 1
             });
             // Give the NPCs their inventories
-            let inventory = this.itemManager.registerInventory(this.npcs[i], []);
+            let inventory = this.itemManager.registerInventory(this.redEnemies[i], []);
             // Give the NPCS their healthbars
-            this.healthbarManager.register(this.npcs[i], this.npcs[i].size.clone());
+            this.healthbarManager.register(this.redEnemies[i], this.redEnemies[i].size.clone());
             // Give the NPCs their GOAP 
             let goap = NPCGoapFactory.buildNPCGoap(NPCGoapType.DEFAULT);
 
             // Give the NPCs their AI
-            this.npcs[i].addAI(NPCBehavior, {
+            this.redEnemies[i].addAI(NPCBehavior, {
                 navkey: "navmesh",
                 battler: battler, 
                 inventory: inventory,
@@ -274,41 +280,106 @@ export default class HW3Scene extends Scene {
             });
 
             // Play the NPCs "IDLE" animation 
-            this.npcs[i].animation.play("IDLE");
+            this.redEnemies[i].animation.play("IDLE");
         }
+        // Initialize the red healers
+        this.redHealers = new Array<AnimatedSprite>(red.healers.length);
+        for (let i = 0; i < red.healers.length; i++) {
+            this.redHealers[i] = this.add.animatedSprite("RedHealer", "primary");
+            this.redHealers[i].position.set(red.healers[i][0], red.healers[i][1]);
+            this.redHealers[i].addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
 
-        // Initialize the "Healer Enemies"
-        for (let i = 8; i < this.npcs.length; i++) {
-            this.npcs[i] = this.add.animatedSprite("gun_enemy", "primary");
-            this.npcs[i].position.set(enemies.enemies[i][0], enemies.enemies[i][1]);
-            this.npcs[i].addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
-
-            let battler: Battler | null = this.battleManager.register(Battler, this.npcs[i], {
+            let battler: Battler | null = this.battleManager.register(Battler, this.redHealers[i], {
                 health: 20,
                 maxHealth: 20,
                 speed: 1,
                 group: 1
             });
-            let inventory: Inventory | null = this.itemManager.registerInventory(this.npcs[i], []);
-            this.healthbarManager.register(this.npcs[i], this.npcs[i].size.clone());
+            let inventory: Inventory | null = this.itemManager.registerInventory(this.redHealers[i], []);
+            this.healthbarManager.register(this.redHealers[i], this.redHealers[i].size.clone());
 
             let goap: GoapObject<NPCGoapAI, NPCAction> = NPCGoapFactory.buildNPCGoap(NPCGoapType.HEALER);
 
-            this.npcs[i].addAI(NPCBehavior, {
+            this.redHealers[i].addAI(NPCBehavior, {
                 navkey: "navmesh",
                 battler: battler, 
                 inventory: inventory,
                 goap: goap,
                 world: this.world
             });
-            this.npcs[i].animation.play("IDLE");
+            this.redHealers[i].animation.play("IDLE");
+        }
+
+        // Get the object data for the blue enemies
+        let blue = this.load.getObject("blue");
+
+        // Initialize the blue enemies
+        this.blueEnemies = new Array<AnimatedSprite>(blue.enemies.length);
+        for (let i = 0; i < blue.enemies.length; i++) {
+            this.blueEnemies[i] = this.add.animatedSprite("BlueEnemy", "primary");
+            this.blueEnemies[i].position.set(blue.enemies[i][0], blue.enemies[i][1]);
+            this.blueEnemies[i].addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
+
+            // Give the NPCs their battler objects
+            let battler = this.battleManager.register(Battler, this.blueEnemies[i], {
+                health: 20,
+                maxHealth: 20,
+                speed: 1,
+                group: 2
+            });
+            // Give the NPCs their inventories
+            let inventory = this.itemManager.registerInventory(this.blueEnemies[i], []);
+            // Give the NPCS their healthbars
+            this.healthbarManager.register(this.blueEnemies[i], this.blueEnemies[i].size.clone());
+            // Give the NPCs their GOAP 
+            let goap = NPCGoapFactory.buildNPCGoap(NPCGoapType.DEFAULT);
+
+            // Give the NPCs their AI
+            this.blueEnemies[i].addAI(NPCBehavior, {
+                navkey: "navmesh",
+                battler: battler, 
+                inventory: inventory,
+                goap: goap,
+                world: this.world
+            });
+
+            // Play the NPCs "IDLE" animation 
+            this.blueEnemies[i].animation.play("IDLE");
+        }
+
+        // Initialize the blue healers
+        this.blueHealers = new Array<AnimatedSprite>(blue.healers.length);
+        for (let i = 0; i < blue.healers.length; i++) {
+            this.blueHealers[i] = this.add.animatedSprite("BlueHealer", "primary");
+            this.blueHealers[i].position.set(blue.healers[i][0], blue.healers[i][1]);
+            this.blueHealers[i].addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
+
+            let battler: Battler | null = this.battleManager.register(Battler, this.blueHealers[i], {
+                health: 20,
+                maxHealth: 20,
+                speed: 1,
+                group: 2
+            });
+            let inventory: Inventory | null = this.itemManager.registerInventory(this.blueHealers[i], []);
+            this.healthbarManager.register(this.blueHealers[i], this.blueHealers[i].size.clone());
+
+            let goap: GoapObject<NPCGoapAI, NPCAction> = NPCGoapFactory.buildNPCGoap(NPCGoapType.HEALER);
+
+            this.blueHealers[i].addAI(NPCBehavior, {
+                navkey: "navmesh",
+                battler: battler, 
+                inventory: inventory,
+                goap: goap,
+                world: this.world
+            });
+            this.blueHealers[i].animation.play("IDLE");
         }
     }
     /**
      * Initialize the items in the scene (healthpacks and laser guns)
      */
     protected initializeItems(): void {
-        let laserguns: Record<string, any> = this.load.getObject("laserguns");
+        let laserguns = this.load.getObject("laserguns");
         this.weapons = new Array<Sprite>(laserguns.items.length);
         for (let i = 0; i < laserguns.items.length; i++) {
             this.weapons[i] = this.add.sprite("laserGun", "primary")
@@ -316,7 +387,7 @@ export default class HW3Scene extends Scene {
             this.itemManager.registerItem(Weapon, this.weapons[i], new LaserGun(this, "test", 3));
         }
 
-        let healthpacks: Record<string, any> = this.load.getObject("healthpacks");
+        let healthpacks = this.load.getObject("healthpacks");
         this.consumables = new Array<Sprite>(healthpacks.items.length);
         for (let i = 0; i < healthpacks.items.length; i++) {
             this.consumables[i] = this.add.sprite("healthpack", "primary");
@@ -335,12 +406,6 @@ export default class HW3Scene extends Scene {
      * @author PeteyLumpkins
      */
     protected initializeNavmesh(): void {
-        // Add a layer to display the graph
-        let gLayer = this.addLayer("graph");
-        // gLayer.setHidden(true);
-
-        let navmeshData = this.load.getObject("navmesh");
-
          // Create the graph
         this.graph = new PositionGraph();
 
@@ -349,7 +414,6 @@ export default class HW3Scene extends Scene {
             for (let j = 0; j < dim.x; j++) {
                 let tile: AABB = this.walls.getTileCollider(j, i);
                 this.graph.addPositionedNode(tile.center);
-                // this.add.graphic(GraphicType.POINT, "graph", {position: tile.center});
             }
         }
 
@@ -386,6 +450,13 @@ export default class HW3Scene extends Scene {
 
         // Set this graph as a navigable entity
         let navmesh = new Navmesh(this.graph);
+        // Add different strategies to use for this navmesh
+        navmesh.registerStrategy("direct", new DirectStrategy(navmesh));
+        navmesh.registerStrategy("astar", new AstarStrategy(navmesh));
+        // Select A* as our navigation strategy
+        navmesh.setStrategy("astar");
+
+        // Add this navmesh to the navigation manager
         this.navManager.addNavigableEntity("navmesh", navmesh);
     }
 }

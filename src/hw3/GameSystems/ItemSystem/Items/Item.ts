@@ -72,14 +72,6 @@ export default abstract class Item {
         return this;
     }
 
-    /**
-     * Destroys this item
-     */
-    public destroy(): void { 
-        if (this.inv !== null) this.inv.remove(this.owner.id)
-        this.inv = null;
-    }
-
     public get owner(): Sprite { return this._owner; }
     protected set owner(owner: Sprite) { this._owner = owner; }
     public get inv(): Inventory { return this._inv; }

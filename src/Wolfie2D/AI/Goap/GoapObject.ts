@@ -24,7 +24,7 @@ export default class GoapObject<E extends AI, T extends GoapAction> {
     /** The current action the goap object is trying to perform */
     protected _action: T | null;
 
-    /** The parent AI of this goap object */
+    /** The parent AI of this goap object - should be an Actor... */
     protected _parent: E | null;
 
     public constructor(goal: string, status: GoapStatusSet<E>, actions: GoapActionSet<E, T>) {

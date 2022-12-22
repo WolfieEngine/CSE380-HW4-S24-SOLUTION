@@ -1,6 +1,6 @@
 {
-    "name": "TopdownEnemy1",
-    "spriteSheetImage": "knife_enemy.png",
+    "name": "BlueEnemy",
+    "spriteSheetImage": "BlueEnemy.png",
     "spriteWidth": 16,
     "spriteHeight": 16,
     "columns": 5,

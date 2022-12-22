@@ -1,84 +1,46 @@
 import PositionGraph from "../DataTypes/Graphs/PositionGraph";
-import Navigable from "../DataTypes/Interfaces/Navigable";
-import Stack from "../DataTypes/Collections/Stack";
+import Navigable from "../DataTypes/Pathfinding/Navigable";
 import Vec2 from "../DataTypes/Vec2";
-import GraphUtils from "../Utils/GraphUtils";
 import NavigationPath from "./NavigationPath";
+import NavigationStrategy from "./Strategies/NavigationStrategy";
 
 /**
  * An implementation of a Navmesh. Navmeshes are graphs in the game world along which nodes can move.
  */
-export default class Navmesh implements Navigable {
+export default class Navmesh implements Navigable<Vec2, NavigationPath> {
 	/** The graph of points in the NavMesh */
-	protected graph: PositionGraph;
+	protected _graph: PositionGraph;
+    /** The strategy used to generate the NavigationPath */
+    protected _strategies: Map<string, NavigationStrategy>;
+    /** The strategy currently being used to generate paths on this Navmesh */
+    protected _strategy: NavigationStrategy | undefined;
 
 	/**
-	 * Creates a new Navmesh from the points in the speecified graph
-	 * @param graph The graph to construct a navmesh from
+	 * Creates a new Navmesh from the points in the speecified graph. Navigation is done using the 
+     * given NavigationStrategy. 
+	 * @param graph the graph to construct a navmesh from
+     * @param strategy a constructor for strategy to use to build paths for this navmesh
 	 */
-	constructor(graph: PositionGraph){
-		this.graph = graph;
+	public constructor(graph: PositionGraph){
+		this._graph = graph;
+        this._strategies = new Map<string, NavigationStrategy>();
+        this._strategy = undefined;
 	}
+
+    public get graph(): PositionGraph { return this._graph; }
+
+    public setStrategy(strategy: string) { this._strategy = this._strategies.get(strategy); }
 
 	// @implemented
-	getNavigationPath(fromPosition: Vec2, toPosition: Vec2, direct: boolean): NavigationPath {
-		let start = this.getClosestNode(fromPosition);
-		let end = this.getClosestNode(toPosition);
-
-		let pathStack = new Stack<Vec2>(this.graph.numVertices);
-		
-		// Push the final position and the final position in the graph
-		pathStack.push(toPosition.clone());
-
-		if (direct) {
-			return new NavigationPath(pathStack);
-		}
-
-		pathStack.push(this.graph.positions[end]);
-
-		// let parent = GraphUtils.djikstra(this.graph, start);
-
-		// // Add all parents along the path
-		// let i = end;
-		// while(parent[i] !== -1){
-		// 	pathStack.push(this.graph.positions[parent[i]]);
-		// 	i = parent[i];
-		// }
-
-		let parent: number[] | null = GraphUtils.astar(this.graph, start, end, (node: number) => { 
-			return this.graph.getNodePosition(node).distanceTo(this.graph.getNodePosition(end)); 
-		});
-
-        if (parent === null) {
-            return new NavigationPath(pathStack);
+	getNavigationPath(fromPosition: Vec2, toPosition: Vec2): NavigationPath {
+        if (this._strategy === undefined) { 
+            throw new Error("Error.No pathfinding strategy set for this navmesh.");
         }
-
-		for (let i = parent.length - 1; i >= 0; i--) {
-			pathStack.push(this.graph.positions[parent[i]]);
-		}
-
-		return new NavigationPath(pathStack);
+		return this._strategy.buildPath(toPosition, fromPosition);
 	}
 
-	/**
-	 * Gets the closest node in this Navmesh to the specified position
-	 * @param position The position to query
-	 * @returns The index of the closest node in the Navmesh to the position
-	 */
-	protected getClosestNode(position: Vec2): number {
-		let n = this.graph.numVertices;
-		let i = 1;
-		let index = 0;
-		let dist = position.distanceSqTo(this.graph.positions[0]);
-		while(i < n){
-			let d = position.distanceSqTo(this.graph.positions[i]);
-			if(d < dist){
-				dist = d;
-				index = i;
-			}
-			i++;
-		}
+    registerStrategy(key: string, strategy: NavigationStrategy): void {
+        this._strategies.set(key, strategy);
+    }
 
-		return index;
-	}
 }

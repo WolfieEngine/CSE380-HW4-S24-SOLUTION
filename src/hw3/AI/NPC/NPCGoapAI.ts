@@ -75,7 +75,7 @@ export default class NPCGoapAI extends StateMachineAI implements AI {
     public get owner(): GameNode { return this._owner; }
     public get position(): Vec2 { return this._owner.position; }
     public get id(): number { return this._owner.id; }
-    public getPath(to: Vec2): NavigationPath { return this._owner.getScene().getNavigationManager().getPath(this._navkey, this.owner.position, to, false); }
+    public getPath(to: Vec2): NavigationPath { return this._owner.getScene().getNavigationManager().getPath(this._navkey, this.owner.position, to); }
     public moveOnPath(speed: number, path: NavigationPath): void { this._owner.moveOnPath(speed, path); }
 
     /** Battler Interface */

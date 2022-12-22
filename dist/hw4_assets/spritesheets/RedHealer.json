@@ -1,6 +1,6 @@
 {
-    "name": "TopdownEnemy2",
-    "spriteSheetImage": "gun_enemy.png",
+    "name": "RedHealer",
+    "spriteSheetImage": "RedHealer.png",
     "spriteWidth": 16,
     "spriteHeight": 16,
     "columns": 5,

@@ -16,8 +16,8 @@ export default class GotoCurrent extends GotoAction {
             this.next = this.next === null ? this.path.next() : this.next;
             npc.location.copy(npc.target.position);
             let next = this.path.next();
-            this.path = !this.next.equals(next) ? npc.getPath(npc.target.position) : this.path;
-            this.next = !this.next.equals(next) ? null : this.next;
+            this.path = this.next && next && !this.next.equals(next) ? npc.getPath(npc.target.position) : this.path;
+            this.next = this.next && next && !this.next.equals(next) ? null : this.next;
         }
         return super.performAction(npc);
     }
