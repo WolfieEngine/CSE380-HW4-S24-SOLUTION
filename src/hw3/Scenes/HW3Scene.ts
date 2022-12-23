@@ -22,7 +22,7 @@ import HW3WorldState from "../GameSystems/WorldState";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
 
 import NPCAction from "../AI/NPC/NPCActions/NPCAction";
-import GoapObject from "../../Wolfie2D/AI/Goap/GoapObject";
+import StateMachineGoapAI from "../../Wolfie2D/AI/Goap/StateMachineGoapAI
 import NPCGoapAI from "../AI/NPC/NPCGoapAI";
 import NPCGoapFactory, { NPCGoapType } from "../AI/NPC/NPCGoapFactory";
 
@@ -219,7 +219,7 @@ export default class HW3Scene extends Scene {
      * Initializes the player in the scene
      */
     protected initializePlayer(): void {
-        this.player = this.add.animatedSprite("player1", "primary");
+        this.player = this.add.animatedSprite(AnimatedSprite, "player1", "primary");
         this.player.position.set(40, 40);
 
         // Give the player physics
@@ -252,7 +252,7 @@ export default class HW3Scene extends Scene {
         // Initialize the red enemies
         this.redEnemies = new Array<AnimatedSprite>(red.enemies.length);
         for (let i = 0; i < red.enemies.length; i++) {
-            this.redEnemies[i] = this.add.animatedSprite("RedEnemy", "primary");
+            this.redEnemies[i] = this.add.animatedSprite(AnimatedSprite, "RedEnemy", "primary");
             this.redEnemies[i].position.set(red.enemies[i][0], red.enemies[i][1]);
             this.redEnemies[i].addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
 
@@ -285,7 +285,7 @@ export default class HW3Scene extends Scene {
         // Initialize the red healers
         this.redHealers = new Array<AnimatedSprite>(red.healers.length);
         for (let i = 0; i < red.healers.length; i++) {
-            this.redHealers[i] = this.add.animatedSprite("RedHealer", "primary");
+            this.redHealers[i] = this.add.animatedSprite(AnimatedSprite, "RedHealer", "primary");
             this.redHealers[i].position.set(red.healers[i][0], red.healers[i][1]);
             this.redHealers[i].addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
 
@@ -316,7 +316,7 @@ export default class HW3Scene extends Scene {
         // Initialize the blue enemies
         this.blueEnemies = new Array<AnimatedSprite>(blue.enemies.length);
         for (let i = 0; i < blue.enemies.length; i++) {
-            this.blueEnemies[i] = this.add.animatedSprite("BlueEnemy", "primary");
+            this.blueEnemies[i] = this.add.animatedSprite(AnimatedSprite, "BlueEnemy", "primary");
             this.blueEnemies[i].position.set(blue.enemies[i][0], blue.enemies[i][1]);
             this.blueEnemies[i].addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
 
@@ -350,7 +350,7 @@ export default class HW3Scene extends Scene {
         // Initialize the blue healers
         this.blueHealers = new Array<AnimatedSprite>(blue.healers.length);
         for (let i = 0; i < blue.healers.length; i++) {
-            this.blueHealers[i] = this.add.animatedSprite("BlueHealer", "primary");
+            this.blueHealers[i] = this.add.animatedSprite(AnimatedSprite, "BlueHealer", "primary");
             this.blueHealers[i].position.set(blue.healers[i][0], blue.healers[i][1]);
             this.blueHealers[i].addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
 
@@ -458,5 +458,17 @@ export default class HW3Scene extends Scene {
 
         // Add this navmesh to the navigation manager
         this.navManager.addNavigableEntity("navmesh", navmesh);
+    }
+
+    public getWalls(): OrthogonalTilemap {
+        return;
+    }
+
+    public getItems(): ItemManager {
+        return;
+    }
+
+    public getBattlers(): BattleManager {
+        return;
     }
 }

@@ -1,5 +1,6 @@
 import { GoapActionStatus } from "../../../../Wolfie2D/DataTypes/Goap/GoapAction";
-import NPCGoapAI from "../NPCGoapAI";
+import Vec2 from "../../../../Wolfie2D/DataTypes/Vec2";
+import NPCActor from "../NPCActor";
 import NPCAction from "./NPCAction";
 
 /**
@@ -8,10 +9,15 @@ import NPCAction from "./NPCAction";
  */
 export default class IdleAction extends NPCAction {
 
-    update(ai: NPCGoapAI): void { }
+    public getTarget(actor: NPCActor): Vec2 {
+        return actor.position;
+    }
+    public getRange(actor: NPCActor): number {
+        return Number.POSITIVE_INFINITY;
+    }
 
-    performAction(ai: NPCGoapAI): GoapActionStatus { return GoapActionStatus.SUCCESS; }
-    
-    reset(ai: NPCGoapAI): void { }
+    public planAction(actor: NPCActor): void {}
+
+    public performAction(actor: NPCActor): GoapActionStatus { return GoapActionStatus.SUCCESS; }
     
 }
