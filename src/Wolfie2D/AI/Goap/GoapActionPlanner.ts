@@ -1,19 +1,12 @@
-import Stack from "../../DataTypes/Collections/Stack";
 import Graph from "../../DataTypes/Graphs/Graph";
-import AI from "../../DataTypes/Interfaces/AI";
+import GoapAction from "./GoapAction";
+import Stack from "../../DataTypes/Collections/Stack";
 import GraphUtils from "../../Utils/GraphUtils";
-import GoapAction from "../../DataTypes/Goap/GoapAction";
+import AI from "../../DataTypes/Interfaces/AI";
 
-/**
- * The planner for GOAP. The planner takes an AI, a goal, a set of statuses, and a set of actions to create
- * a new GOAP plan. The plan is constructed based on the given status and the current state of the AI.
- * 
- * TODO: We should be passing an Actor to this method, not an AI. An Actor can have AI, but AI is meant
- * to define behavior...
- */
 export default class GoapActionPlanner {
-
-    public static plan <T extends GoapAction> (ai: AI, status: string[], goal: string, actions: Array<T>): Stack<T> {
+    
+    public static plan<T extends GoapAction>(status: string[], goal: string, actions: Array<T>): Stack<T> {
         let graph: Graph = new Graph(true);
         let mapping: Map<number, T | string> = new Map();
 
@@ -26,7 +19,7 @@ export default class GoapActionPlanner {
         graph.addEdge(1,1,Number.POSITIVE_INFINITY);
 
         //Build tree from 0 to 1
-        this.buildTree<T>(ai, status, actions, 0, goal, mapping, graph);
+        this.buildTree<T>(status, actions, 0, goal, mapping, graph);
 
         //Run djikstra to find shortest path
         let path: Array<number> = GraphUtils.djikstra(graph, 0);
@@ -45,11 +38,11 @@ export default class GoapActionPlanner {
         return plan;
     }
 
-    private static buildTree  <T extends GoapAction> (ai: AI, status: string[], actions: Array<T>, root: number, goal: string, mapping: Map<number, T | string>, graph: Graph): void {
+    private static buildTree  <T extends GoapAction> (status: string[], actions: Array<T>, root: number, goal: string, mapping: Map<number, T | string>, graph: Graph): void {
         //For each possible action 
         actions.forEach(action => {
             //Can it be performed?
-            if (action.checkPreconditions(ai, status)){
+            if (action.checkPreconditions(status)){
                 //This action can be performed
                 //Add effects to currentStatus
                 let newStatus = [...status];
@@ -71,7 +64,7 @@ export default class GoapActionPlanner {
                 
                 //Recursive call
                 let newActions = actions.filter(act => act !== action)
-                this.buildTree(ai, newStatus, newActions, newNode, goal, mapping, graph);
+                this.buildTree(newStatus, newActions, newNode, goal, mapping, graph);
             }
         });
     }
