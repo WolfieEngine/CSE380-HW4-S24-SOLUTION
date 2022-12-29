@@ -7,15 +7,16 @@ import NPCAction from "../NPCAction";
 
 export default abstract class PickupItem extends NPCAction {
 
-    protected item: Item | null;
+    public static readonly RANGE: number = 25;
 
-    protected target: Vec2;
-    protected range: number;
+    protected item: Item | null;
 
     constructor() {
         super()
         this.item = null;
+        this._range = PickupItem.RANGE;
     }
+
 
     public performAction(actor: NPCActor): GoapActionStatus {
         if (this.item === null) { 
@@ -24,15 +25,7 @@ export default abstract class PickupItem extends NPCAction {
         return this.item.pickup(actor.inventory) !== null ? GoapActionStatus.SUCCESS : GoapActionStatus.FAILURE;
     }
 
-    public getTarget(actor: NPCActor): Vec2 {
-        return this.target
-    }
-
-    public getRange(actor: NPCActor): number {
-        return 25;
-    }
-
-    abstract getItem(npc: NPCActor): Item | null;
+    public abstract planAction(actor: NPCActor): void;
 
 
 }

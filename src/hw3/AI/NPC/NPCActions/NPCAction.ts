@@ -13,9 +13,4 @@ export default abstract class NPCAction extends GoapAction {
     /** Plans the action */
     public abstract planAction(actor: NPCActor): void;
 
-    /** Gets the location where this actor should be before performing the action */
-    public abstract getTarget(actor: NPCActor): Vec2;
-
-    /** Gets the distance this actor should be from the target location */
-    public abstract getRange(actor: NPCActor): number;
 }

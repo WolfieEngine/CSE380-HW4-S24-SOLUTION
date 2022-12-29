@@ -9,13 +9,6 @@ import NPCAction from "./NPCAction";
  */
 export default class IdleAction extends NPCAction {
 
-    public getTarget(actor: NPCActor): Vec2 {
-        return actor.position;
-    }
-    public getRange(actor: NPCActor): number {
-        return Number.POSITIVE_INFINITY;
-    }
-
     public planAction(actor: NPCActor): void {}
 
     public performAction(actor: NPCActor): GoapActionStatus { return GoapActionStatus.SUCCESS; }

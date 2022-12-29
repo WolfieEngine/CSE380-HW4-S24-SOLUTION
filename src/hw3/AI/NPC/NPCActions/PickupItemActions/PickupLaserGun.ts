@@ -7,8 +7,9 @@ import PickupItemAction from "./PickupAction";
 
 export default class PickupLaserGun extends PickupItemAction {
 
-    public override getItem(npc: NPCActor): Item | null {
-        return npc.getScene().getItems().findItem(item => item.type.constructor === LaserGun)
+    public planAction(actor: NPCActor): void {
+        this.item = actor.getScene().getItems().findItem(item => item.type.constructor === LaserGun);
+        this.target.copy(this.item.owner.position);
     }
-    
+
 }
