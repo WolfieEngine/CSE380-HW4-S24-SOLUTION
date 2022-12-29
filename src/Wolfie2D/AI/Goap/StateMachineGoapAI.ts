@@ -65,8 +65,9 @@ export default class StateMachineGoapAI<T extends GoapAction> extends StateMachi
     public buildPlan(): Stack<T> {
         // Get all the current statuses
         let statuses = Array.from(this._statuses.values()).filter(stat => stat.checkProceduralPreconditions(this.owner)).map(stat => stat.key);
-        // Get all the current actions
-        let actions = Array.from(this._actions.values());
+        // Get all the current actions and plan them out
+        let actions = Array.from(this._actions.values())
+        actions.forEach(action => action.planAction(this.owner));
         // Create the plan
         return GoapActionPlanner.plan<T>(statuses, this._goal.key, actions);
     }

@@ -36,10 +36,10 @@ export default abstract class GoapAction {
     public abstract planAction(actor: GameNode): void;
 
     /** Gets the location where this actor should be before performing the action */
-    public getTarget(actor: GameNode): Vec2 { return this._target; }
+    public get target(): Vec2 { return this._target; }
 
     /** Gets the distance this actor should be from the target location */
-    public getRange(actor: GameNode): number { return this._range; }
+    public get range(): number { return this._range; }
 
     public checkPreconditions(status: string[]): boolean {
         return status.every(stat => Array.from(this._preconditions.values()).map(stat => stat.key).includes(stat));

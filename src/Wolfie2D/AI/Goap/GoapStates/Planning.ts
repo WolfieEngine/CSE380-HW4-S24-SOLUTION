@@ -4,7 +4,7 @@ import GameNode from "../../../Nodes/GameNode";
 import GoapAction from "../GoapAction";
 import StateMachineGoapAI from "../StateMachineGoapAI";
 
-export default class Acting extends State {
+export default class Planning extends State {
     
     protected parent: StateMachineGoapAI<GoapAction>;
 

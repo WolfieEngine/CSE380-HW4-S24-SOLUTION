@@ -20,28 +20,21 @@ export default class Moving extends State {
         // If the plan is empty that's bad -> should get a new plan
         if (this.parent.getPlan().isEmpty()) {
             this.finished("PLAN");
-        } 
-
+        }
         // Otherwise, get the next action we should perform
         else {
             this.action = this.parent.getPlan().peek();
         }
     }
 
-    public handleInput(event: GameEvent): void {
-        switch(event.type) {
-            default: {
-                
-            }
-        }
-    }
+    public handleInput(event: GameEvent): void { }
 
     public update(deltaT: number): void {
         let owner = this.parent.getOwner();
 
          // Get the target location we're moving to
-        let target = this.action.getTarget(owner);
-        if (target.distanceTo(owner.position) <= this.action.getRange(owner)) {
+        let target = this.action.target;
+        if (target.distanceTo(owner.position) <= this.action.range) {
             this.finished("ACTING");
         } else {
             owner.move(target.scaled(deltaT));
