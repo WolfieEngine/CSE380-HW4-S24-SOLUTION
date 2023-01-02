@@ -1,15 +1,14 @@
-import Vec2 from "../../../../../Wolfie2D/DataTypes/Vec2";
-import Item from "../../../../GameSystems/ItemSystem/Items/Item";
-import LaserGun from "../../../../GameSystems/ItemSystem/ItemTypes/LaserGun";
 import NPCActor from "../../NPCActor";
-import NPCGoapAI from "../../NPCGoapAI";
 import PickupItemAction from "./PickupAction";
 
 export default class PickupLaserGun extends PickupItemAction {
 
     public planAction(actor: NPCActor): void {
-        this.item = actor.getScene().getItems().findItem(item => item.type.constructor === LaserGun);
-        this.target.copy(this.item.owner.position);
+        let laserguns = Array.from(actor.getScene().getLaserGuns());
+        let lasergun = laserguns.reduce((l1, l2) => {
+            return l1.position.distanceSqTo(actor.position) < l2.position.distanceSqTo(actor.position) ? l1 : l2
+        })
+        this.target.copy(lasergun.position);
     }
 
 }

@@ -1,36 +1,37 @@
-import State from "../../../DataTypes/State/State";
-import StateMachine from "../../../DataTypes/State/StateMachine";
-import GameEvent from "../../../Events/GameEvent";
-import GameNode from "../../../Nodes/GameNode";
-import GoapAction, { GoapActionStatus } from "../GoapAction";
-import StateMachineGoapAI from "../StateMachineGoapAI";
+import { GoapActionStatus } from "../../../../Wolfie2D/AI/Goap/GoapAction";
+import GameEvent from "../../../../Wolfie2D/Events/GameEvent";
+import NPCAction from "../NPCActions/NPCAction";
+import NPCActor from "../NPCActor";
+import NPCBehavior from "../NPCBehavior";
+import NPCState from "../NPCState";
 
-export default class Acting extends State {
+export default class Acting extends NPCState {
     
-    protected parent: StateMachineGoapAI<GoapAction>;
-    protected action: GoapAction;
+    protected action: NPCAction;
 
-    public constructor(parent: StateMachineGoapAI<GoapAction>) {
-        super(parent);
+    public constructor(parent: NPCBehavior, actor: NPCActor) {
+        super(parent, actor);
         this.action = null;
     }
     
     public onEnter(options: Record<string, any>): void {
         if (this.parent.getPlan().isEmpty()) {
-            this.finished("PLAN");
+            this.finished("PLANNING");
         } else {
             // Get the action at the top of the plan and perform the action
             this.action = this.parent.getPlan().peek();
-            this.performAction();
+            // Call the start method for the action
+            this.action.onStart(this.actor);
         }
     }
     public handleInput(event: GameEvent): void {
         
     }
+
     public update(deltaT: number): void {
-        let owner = this.parent.getOwner();
-        let target = this.action.getTarget(owner);
-        if (target.distanceTo(owner.position) > this.action.getRange(owner)) {
+        let target = this.action.target;
+
+        if (target.distanceTo(this.actor.position) > this.action.range) {
             this.finished("MOVING");
         } else {
             this.performAction();
@@ -42,19 +43,19 @@ export default class Acting extends State {
     }
 
     private performAction(): void {
-        let res = this.action.performAction(this.parent.getOwner());
+        let res = this.action.performAction(this.actor);
         switch (res) {
             case GoapActionStatus.SUCCESS: {
                 // Pop the action
                 this.parent.getPlan().pop();
                 // Go back to the planning state
-                this.finished("PLAN");
+                this.finished("PLANNING");
                 break;
             }
             case GoapActionStatus.FAILURE: {
                 // Clear the plan -> go back and create a new plan
                 this.parent.getPlan().clear();
-                this.finished("PLAN");
+                this.finished("PLANNING");
                 break;
             }
             case GoapActionStatus.RUNNING: {

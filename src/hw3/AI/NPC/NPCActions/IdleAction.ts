@@ -1,4 +1,4 @@
-import { GoapActionStatus } from "../../../../Wolfie2D/DataTypes/Goap/GoapAction";
+import { GoapActionStatus } from "../../../../Wolfie2D/AI/Goap/GoapAction";
 import Vec2 from "../../../../Wolfie2D/DataTypes/Vec2";
 import NPCActor from "../NPCActor";
 import NPCAction from "./NPCAction";
