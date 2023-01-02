@@ -20,7 +20,7 @@ import StateMachineAI from "../StateMachineAI";
  * 
  * @author Peter Walsh
  */
-export default class StateMachineGoapAI<T extends GoapAction> extends StateMachineAI {
+export default abstract class StateMachineGoapAI<T extends GoapAction> extends StateMachineAI {
 
     /** The parent Actor of this GoapAI */
     protected owner: GameNode | null;
@@ -30,6 +30,7 @@ export default class StateMachineGoapAI<T extends GoapAction> extends StateMachi
 
     /** All statuses for this GoapAI */
     protected _statuses: Map<string, GoapStatus>
+
     /** All actions for this GoapAI */
     protected _actions: Map<string, T>
 
@@ -49,9 +50,7 @@ export default class StateMachineGoapAI<T extends GoapAction> extends StateMachi
 
     public getOwner(): GameNode { return this.owner; }
 
-    public initializeAI(owner: GameNode, options: Record<string, any>): void {
-        this.owner = owner;
-    }
+    public abstract initializeAI(owner: GameNode, options: Record<string, any>): void;
 
     public update(deltaT: number): void {
         super.update(deltaT);
@@ -74,5 +73,17 @@ export default class StateMachineGoapAI<T extends GoapAction> extends StateMachi
 
     public setPlan(plan: Stack<T>): void { this._plan = plan; }
     public getPlan(): Stack<T> { return this._plan; }
+
+    public set goal(goal: string) { 
+        this._goal = this._statuses.get(goal);
+    }
+
+    public addStatus(status: GoapStatus): void {
+        this._statuses.set(status.key, status);
+    }
+
+    public addAction(action: T): void {
+        this._actions.set(action.key, action);
+    }
 
 }

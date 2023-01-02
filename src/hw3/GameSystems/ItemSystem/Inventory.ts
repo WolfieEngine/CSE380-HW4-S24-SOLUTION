@@ -1,51 +1,81 @@
-import GameEvent from "../../../Wolfie2D/Events/GameEvent";
-import GameNode from "../../../Wolfie2D/Nodes/GameNode";
-import { ItemEvent } from "../../Events";
-import Item from "./Items/Item";
+import Unique from "../../../Wolfie2D/DataTypes/Interfaces/Unique";
+import Emitter from "../../../Wolfie2D/Events/Emitter";
+import Item from "./Item";
 
 /**
  * An inventory is a collection of items. All items in the inventory must be registered with
  * the Inventorys ItemManager class. 
  */
-export default class Inventory {
+export default class Inventory implements Unique {
 
-    /** The GameNode that owns this inventory */
-    protected _owner: GameNode;
+    /** The id number of the next inventory */
+    private static NEXT_ID: number = 0;
+
+    /** The id of this inventory */
+    protected __id: number;
+
+    /** The collection of items in the inventory */
+    protected _inventory: Map<number, Item>;
 
     /** A flag indicating whether the */
     protected _dirty: boolean;
 
     /** The maximum number of items this inventory can hold */
-    protected _cap: number;
+    protected _capacity: number;
 
     /** The number of items in this inventory */
     protected _size: number;
 
-    /** The collection of items in the inventory */
-    protected inv: Map<number, Item>;
+    /** The event to fire when this inventory changes */
+    protected _onChange: string | null;
 
-    public constructor(owner: GameNode, items: Array<Item> = [], cap: number = 9) {
-        this._owner = owner;
-        this._size = 0;
-        this._cap = cap;
-        this.inv = new Map<number, Item>();
-        items.forEach(item => item.pickup(this));
+    /** An emitter used to emit events when this inventory changes */
+    protected _emitter: Emitter;
+
+    public constructor(capacity: number = 10) {
+        this.__id = Inventory.NEXT_ID 
+        Inventory.NEXT_ID += 1;
+
+        this.inventory = new Map<number, Item>();
+        this._emitter = new Emitter();
+
+        this.size = 0;
+        this.capacity = capacity;
+        this.dirty = false;
+        this.onChange = null;
+        
     }
 
-    public get owner(): GameNode { return this._owner; }
+    public get id(): number { return this.__id; }
+
     public get dirty(): boolean { return this._dirty; }
     protected set dirty(dirty: boolean) { this._dirty = dirty; }
+
+    public get size(): number { return this._size; }
+    protected set size(size: number) { this._size = size; }
+
+    public get capacity(): number { return this._capacity; }
+    protected set capacity(capacity: number) { this._capacity = capacity; }
+
+    public get onChange(): string { return this._onChange; }
+    public set onChange(onChange: string) { this._onChange = onChange; }
+
+    protected get inventory(): Map<number, Item> { return this._inventory; }
+    protected set inventory(inventory: Map<number, Item>) { this._inventory = inventory; }
+
+    protected get emitter(): Emitter { return this._emitter; }
+    protected set emitter(emitter: Emitter) { this._emitter = emitter; }
 
     /**
      * Gets an item from this inventory by id.
      * @param id the id of the item to get
      * @returns the item if it exists; null otherwise
      */
-    get(id: number): Item | null {
+    public get(id: number): Item | null {
         if (!this.has(id)) {
             return null;
         }
-        return this.inv.get(id);
+        return this.inventory.get(id);
     }
 
     /**
@@ -53,14 +83,17 @@ export default class Inventory {
      * @param item adds an item to the inventory with the key of the items owner
      * @returns if the Item was successfully added to the inventory; null otherwise
      */
-    add(item: Item): Item | null { 
-        if (this.has(item.owner.id) || this._size >= this._cap) {
+    public add(item: Item): Item | null { 
+        if (this.has(item.id) || this.size >= this.capacity || item.inventory !== null) {
             return null;
         }
-        console.log("Inventory.add", `Adding item with id ${item.owner.id} to inventory with owner id ${this.owner.id}`);
-        this.inv.set(item.owner.id, item);
-        this._size += 1;
+        this.inventory.set(item.id, item);
+        this.size += 1;
         this.dirty = true;
+
+        item.inventory = this;
+        item.visible = false;
+
         return item;
     }
 
@@ -69,8 +102,8 @@ export default class Inventory {
      * @param id the id of the item in the inventory
      * @returns true if the item with the id exists; false otherwise
      */
-    has(id: number): boolean { 
-        return this.inv.has(id);
+    public has(id: number): boolean { 
+        return this.inventory.has(id);
     }
 
     /**
@@ -78,14 +111,17 @@ export default class Inventory {
      * @param id the id of the item
      * @returns the item that was removed or null 
      */
-    remove(id: number): Item | null { 
+    public remove(id: number): Item | null { 
         if (!this.has(id)) {
             return null;
         }
         let item: Item = this.get(id);
-        this.inv.delete(id);
-        this._size -= 1;
+        this.inventory.delete(id);
+        this.size -= 1;
         this.dirty = true
+
+        item.inventory = null;
+
         return item;
     }
 
@@ -94,8 +130,8 @@ export default class Inventory {
      * @param pred the predicate function (the condition)
      * @returns 
      */
-    find(pred: (item: Item) => boolean): Item | null {
-       let item: Item = Array.from(this.inv.values()).find(pred);
+    public find(pred: (item: Item) => boolean): Item | null {
+       let item: Item = Array.from(this.inventory.values()).find(pred);
        return item === undefined ? null : item;
     }
 
@@ -104,23 +140,24 @@ export default class Inventory {
      * @param pred the predicate function
      * @returns a list of Items
      */
-    findAll(pred: (item: Item) => boolean): Item[] | [] {
-        return Array.from(this.inv.values()).filter(pred);
+    public findAll(pred: (item: Item) => boolean): Item[] | [] {
+        return Array.from(this.inventory.values()).filter(pred);
     }
+
     /**
      * Applies the given function to each item in the Inventory
      * @param func the function
      */
-    forEach(func: (item: Item) => void): void {
-        for (let item of this.inv.values()) {
+    public forEach(func: (item: Item) => void): void {
+        for (let item of this.inventory.values()) {
             func(item);
         }
     }
 
     public clean(): void {
-        this._dirty = false;
-        if (this.owner.aiActive) {
-            this.owner._ai.handleEvent(new GameEvent(ItemEvent.INVENTORY_CHANGED, {id: this.owner.id, inv: Array.from(this.inv.values())}));
+        this.dirty = false;
+        if (this.onChange !== null) {
+            this.emitter.fireEvent(this.onChange, {id: this.id});
         }
     }
 }

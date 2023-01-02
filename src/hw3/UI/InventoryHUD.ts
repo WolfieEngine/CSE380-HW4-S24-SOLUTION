@@ -9,7 +9,7 @@ import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import Color from "../../Wolfie2D/Utils/Color";
 import Scene from "../../Wolfie2D/Scene/Scene";
 import Updateable from "../../Wolfie2D/DataTypes/Interfaces/Updateable";
-import Item from "../GameSystems/ItemSystem/Items/Item";
+import Item from "../GameSystems/ItemSystem/Item";
 
 /**
  * Manages the player inventory that is displayed in the UI. Fun fact, I actually managed to port this
@@ -109,9 +109,9 @@ export default class InventoryManager implements Updateable {
         let scale = this.scene.getViewScale();
 
         inv.forEach((item: Item, idx: number) => {
-            this.scene.getLayer(this.itemLayer).addNode(item.owner);
-            item.owner.position.copy(this.itemSlots[idx].position);
-            item.owner.visible = true;
+            // this.scene.getLayer(this.itemLayer).addNode(item);
+            item.position.copy(this.itemSlots[idx].position);
+            item.visible = true;
         });
 
     }
