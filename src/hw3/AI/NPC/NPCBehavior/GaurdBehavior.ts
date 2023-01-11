@@ -19,51 +19,10 @@ import TargetAction from "../NPCActions/TargetAction";
 import { HasItem } from "../NPCStatuses/HasItem";
 import FalseStatus from "../NPCStatuses/FalseStatus";
 import GameEvent from "../../../../Wolfie2D/Events/GameEvent";
+import GoapAction from "../../../../Wolfie2D/AI/Goap/GoapAction";
+import GoapState from "../../../../Wolfie2D/AI/Goap/GoapState";
 
-enum GuardStatuses {
 
-    AT_GUARD_POSITION = "at-guard-position",
-
-    TARGETED_GUARD_POSITION = "targeted-guard-position",
-
-    ENEMY_IN_GUARD_POSITION = "enemy-at-guard-position",
-
-    ENEMY_TARGETED = "enemy-targeted",
-
-    AT_ENEMY = "at-enemy",
-
-    HAS_LASERGUN = "has-laser-gun",
-
-    LASERGUN_TARGETED = "lasergun-targeted",
-
-    LASERGUN_EXISTS = "laser-gun-exists",
-
-    AT_LASERGUN = "at-laser-gun",
-
-    GOAL = "goal"
-}
-
-enum GuardActions {
-
-    GOTO_GUARD_POSITION = "goto-guard-position",
-
-    GOTO_LASER_GUN = "goto-lasergun",
-
-    GOTO_ENEMY = "goto-enemy",
-
-    TARGET_LASERGUN = "target-lasergun",
-
-    TARGET_ENEMY = "target-enemy",
-
-    TARGET_GUARD_POSITION = "target-guard position",
-
-    PICKUP_LASER_GUN = "pickup-lasergun",
-
-    SHOOT_ENEMY = "shoot-enemy",
-
-    GUARD = "guard",
-
-}
 
 interface GuardOptions {
 
@@ -125,7 +84,7 @@ export default class GuardBehavior extends NPCBehavior {
         this.addStatus(GuardStatuses.AT_GUARD_POSITION, atGuardPosition);
 
         // A status checking if there are any enemies at target the guard is guarding
-        let enemyBattlerFinder = new BasicFinder<HW3Battler>(null, BattlerActiveFilter(), BattlerGroupFilter([this.owner.battleGroup], false), RangeFilter(this.target, 0, this.range*this.range))
+        let enemyBattlerFinder = new BasicFinder<HW3Battler>(null, BattlerActiveFilter(), BattlerGroupFilter([this.owner.battleGroup], false), RangeFilter(this.target, 0, this.range))
         let enemyAtGuardPosition = new TargetExists(scene.getBattlers(), enemyBattlerFinder)
         this.addStatus(GuardStatuses.ENEMY_IN_GUARD_POSITION, enemyAtGuardPosition);
 
@@ -157,7 +116,7 @@ export default class GuardBehavior extends NPCBehavior {
         // An action for targeting an enemy in the guard's guard area
         let findEnemyInGuardArea = new BasicFinder<HW3Battler>(ClosestPositioned(owner), BattlerGroupFilter([owner.battleGroup], false), RangeFilter(this.target, 0, this.range*this.range));
         let targetEnemyInGuardArea = new TargetAction(this, this.owner, scene.getBattlers(), findEnemyInGuardArea);
-        targetEnemyInGuardArea.cost = 5;
+        targetEnemyInGuardArea.cost = 2;
         targetEnemyInGuardArea.addPrecondition(GuardStatuses.ENEMY_IN_GUARD_POSITION);
         targetEnemyInGuardArea.addEffect(GuardStatuses.ENEMY_TARGETED);
         this.addState(GuardActions.TARGET_ENEMY, targetEnemyInGuardArea)
@@ -204,7 +163,7 @@ export default class GuardBehavior extends NPCBehavior {
         // An action for targeting the guards guard position
         let targetGuardPosition = new TargetAction(this, this.owner, [this.target], new BasicFinder(null));
         targetGuardPosition.addEffect(GuardStatuses.TARGETED_GUARD_POSITION);
-        targetGuardPosition.cost = 1;
+        targetGuardPosition.cost = 5;
         this.addState(GuardActions.TARGET_GUARD_POSITION, targetGuardPosition)
 
         // An action for going to the guards guard position
@@ -222,4 +181,63 @@ export default class GuardBehavior extends NPCBehavior {
         guard.cost = 5;
         this.addState(GuardActions.GUARD, guard);
     }
+
+    public addState(stateName: GuardAction, state: GoapAction): void {
+        super.addState(stateName, state);
+    }
+
+    public addStatus(statusName: GuardStatus, status: GoapState): void {
+        super.addStatus(statusName, status);
+    }
 }
+
+type GuardStatus = typeof GuardStatuses[keyof typeof GuardStatuses];
+
+const GuardStatuses = {
+
+    AT_GUARD_POSITION: "at-guard-position",
+
+    TARGETED_GUARD_POSITION: "targeted-guard-position",
+
+    ENEMY_IN_GUARD_POSITION: "enemy-at-guard-position",
+
+    ENEMY_TARGETED: "enemy-targeted",
+
+    AT_ENEMY: "at-enemy",
+
+    HAS_LASERGUN: "has-laser-gun",
+
+    LASERGUN_TARGETED: "lasergun-targeted",
+
+    LASERGUN_EXISTS: "laser-gun-exists",
+
+    AT_LASERGUN: "at-laser-gun",
+
+    GOAL: "goal"
+
+ } as const;
+
+type GuardAction = typeof GuardActions[keyof typeof GuardActions];
+
+const GuardActions = {
+
+    GOTO_GUARD_POSITION: "goto-guard-position",
+
+    GOTO_LASER_GUN: "goto-lasergun",
+
+    GOTO_ENEMY: "goto-enemy",
+
+    TARGET_LASERGUN: "target-lasergun",
+
+    TARGET_ENEMY: "target-enemy",
+
+    TARGET_GUARD_POSITION: "target-guard position",
+
+    PICKUP_LASER_GUN: "pickup-lasergun",
+
+    SHOOT_ENEMY: "shoot-enemy",
+
+    GUARD: "guard",
+
+} as const;
+
