@@ -2,7 +2,7 @@ import GameEvent from "../../../../Wolfie2D/Events/GameEvent";
 import Battler from "../../../GameSystems/BattleSystem/Battler";
 import Healthpack from "../../../GameSystems/ItemSystem/Items/Healthpack";
 import { TargetableEntity } from "../../../GameSystems/Targeting/TargetableEntity";
-import NPCActor from "../NPCActor";
+import NPCActor from "../../../Actors/NPCActor";
 import NPCBehavior from "../NPCBehavior";
 import NPCAction from "./NPCAction";
 

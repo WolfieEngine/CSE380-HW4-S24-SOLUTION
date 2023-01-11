@@ -1,7 +1,7 @@
 import NavigationPath from "../../../../Wolfie2D/Pathfinding/NavigationPath";
 import Finder from "../../../GameSystems/Searching/BasicFinder";
 import { TargetableEntity } from "../../../GameSystems/Targeting/TargetableEntity";
-import NPCActor from "../NPCActor";
+import NPCActor from "../../../Actors/NPCActor";
 import NPCBehavior from "../NPCBehavior";
 import NPCAction from "./NPCAction";
 

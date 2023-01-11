@@ -1,18 +1,18 @@
-import Spritesheet from "../../../Wolfie2D/DataTypes/Spritesheet";
-import Vec2 from "../../../Wolfie2D/DataTypes/Vec2";
-import AnimatedSprite from "../../../Wolfie2D/Nodes/Sprites/AnimatedSprite"
-import NavigationPath from "../../../Wolfie2D/Pathfinding/NavigationPath";
-import { HudEvent } from "../../Events";
-import Inventory from "../../GameSystems/ItemSystem/Inventory";
-import HW3Scene from "../../Scenes/HW3Scene";
-import BasicTargetable from "../../GameSystems/Targeting/BasicTargetable";
-import BasicTargeting from "../../GameSystems/Targeting/BasicTargeting";
+import Spritesheet from "../../Wolfie2D/DataTypes/Spritesheet";
+import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
+import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite"
+import NavigationPath from "../../Wolfie2D/Pathfinding/NavigationPath";
+import { HudEvent } from "../Events";
+import Inventory from "../GameSystems/ItemSystem/Inventory";
+import HW3Scene from "../Scenes/HW3Scene";
+import BasicTargetable from "../GameSystems/Targeting/BasicTargetable";
+import BasicTargeting from "../GameSystems/Targeting/BasicTargeting";
 
-import Battler from "../../GameSystems/BattleSystem/Battler";
-import { TargetableEntity } from "../../GameSystems/Targeting/TargetableEntity";
-import { TargetingEntity } from "../../GameSystems/Targeting/TargetingEntity";
-import BasicBattler from "../../GameSystems/BattleSystem/BasicBattler";
-import HW3Battler from "../../GameSystems/BattleSystem/HW3Battler";
+import Battler from "../GameSystems/BattleSystem/Battler";
+import { TargetableEntity } from "../GameSystems/Targeting/TargetableEntity";
+import { TargetingEntity } from "../GameSystems/Targeting/TargetingEntity";
+import BasicBattler from "../GameSystems/BattleSystem/BasicBattler";
+import HW3Battler from "../GameSystems/BattleSystem/HW3Battler";
 
 
 export default class NPCActor extends AnimatedSprite implements HW3Battler, TargetingEntity {
@@ -40,31 +40,18 @@ export default class NPCActor extends AnimatedSprite implements HW3Battler, Targ
         this.receiver.subscribe("use-hpack");
     }
 
-    clearTarget(): void { this._targeting.clearTarget(); }
+    /** The TargetingEntity interface */
 
-    setTarget(targetable: TargetableEntity): void {
-        this._targeting.setTarget(targetable);
-    }
-
-    hasTarget(): boolean {
-        return this._targeting.hasTarget();
-    }
-
-    getTarget(): TargetableEntity {
-        return this._targeting.getTarget();
-    }
+    public clearTarget(): void { this._targeting.clearTarget(); }
+    public setTarget(targetable: TargetableEntity): void { this._targeting.setTarget(targetable); }
+    public hasTarget(): boolean { return this._targeting.hasTarget(); }
+    public getTarget(): TargetableEntity { return this._targeting.getTarget(); }
     
-    getTargeting(): TargetingEntity[] { 
-        return this._targetable.getTargeting(); 
-    }
+    /** The TargetableEntity interface */
 
-    addTargeting(targeting: TargetingEntity): void { 
-        this._targetable.addTargeting(targeting); 
-    }
-
-    removeTargeting(targeting: TargetingEntity): void {
-        this._targetable.removeTargeting(targeting);
-    }
+    public getTargeting(): TargetingEntity[] { return this._targetable.getTargeting(); }
+    public addTargeting(targeting: TargetingEntity): void { this._targetable.addTargeting(targeting); }
+    public removeTargeting(targeting: TargetingEntity): void { this._targetable.removeTargeting(targeting); }
 
     atTarget(): boolean {
         return this._targeting.getTarget().position.distanceSqTo(this.position) < 625;
@@ -102,6 +89,8 @@ export default class NPCActor extends AnimatedSprite implements HW3Battler, Targ
     }
 
     public get inventory(): Inventory { return this.battler.inventory; }
+
+    /** Protected getters for the different components */
 
     protected get battler(): Battler { return this._battler; }
     protected get targetable(): TargetableEntity { return this._targetable; }

@@ -1,13 +1,13 @@
-import Spritesheet from "../../../Wolfie2D/DataTypes/Spritesheet";
-import AnimatedSprite from "../../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
-import { ItemEvent } from "../../Events";
-import BasicBattler from "../../GameSystems/BattleSystem/BasicBattler";
-import Battler from "../../GameSystems/BattleSystem/Battler";
-import HW3Battler from "../../GameSystems/BattleSystem/HW3Battler";
-import Inventory from "../../GameSystems/ItemSystem/Inventory";
-import HW3Item from "../../GameSystems/ItemSystem/Item";
-import { TargetingEntity } from "../../GameSystems/Targeting/TargetingEntity";
-import HW3Scene from "../../Scenes/HW3Scene";
+import Spritesheet from "../../Wolfie2D/DataTypes/Spritesheet";
+import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
+import { ItemEvent } from "../Events";
+import BasicBattler from "../GameSystems/BattleSystem/BasicBattler";
+import Battler from "../GameSystems/BattleSystem/Battler";
+import HW3Battler from "../GameSystems/BattleSystem/HW3Battler";
+import Inventory from "../GameSystems/ItemSystem/Inventory";
+import HW3Item from "../GameSystems/ItemSystem/Item";
+import { TargetingEntity } from "../GameSystems/Targeting/TargetingEntity";
+import HW3Scene from "../Scenes/HW3Scene";
 
 
 export default class PlayerActor extends AnimatedSprite implements HW3Battler {

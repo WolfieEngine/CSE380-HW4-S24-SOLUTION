@@ -24,12 +24,12 @@ import GameOver from "./GameOver";
 
 import AstarStrategy from "../Pathfinding/AstarStrategy";
 import DirectStrategy from "../../Wolfie2D/Pathfinding/Strategies/DirectStrategy";
-import PlayerActor from "../AI/Player/PlayerActor";
+import PlayerActor from "../Actors/PlayerActor";
 import LaserGun from "../GameSystems/ItemSystem/Items/LaserGun";
 import { GraphicType } from "../../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import Line from "../../Wolfie2D/Nodes/Graphics/Line";
 import Healthpack from "../GameSystems/ItemSystem/Items/Healthpack";
-import NPCActor from "../AI/NPC/NPCActor";
+import NPCActor from "../Actors/NPCActor";
 import GruntBehavior from "../AI/NPC/NPCBehavior/GaurdBehavior";
 import Viewport from "../../Wolfie2D/SceneGraph/Viewport";
 import RenderingManager from "../../Wolfie2D/Rendering/RenderingManager";

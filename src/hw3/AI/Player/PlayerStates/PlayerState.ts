@@ -155,5 +155,5 @@ import Idle from "./Idle";
 import Invincible from "./Invincible";
 import Moving from "./Moving";
 import Dead from "./Dead";
-import PlayerActor from "../PlayerActor";
+import PlayerActor from "../../../Actors/PlayerActor";
 export { Idle, Invincible, Moving, Dead} 

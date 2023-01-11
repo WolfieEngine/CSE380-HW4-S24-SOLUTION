@@ -5,7 +5,7 @@ import GameEvent from "../../../../Wolfie2D/Events/GameEvent";
 import OrthogonalTilemap from "../../../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
 import LaserGun from "../../../GameSystems/ItemSystem/Items/LaserGun";
 import { TargetableEntity } from "../../../GameSystems/Targeting/TargetableEntity";
-import NPCActor from "../NPCActor";
+import NPCActor from "../../../Actors/NPCActor";
 import NPCBehavior from "../NPCBehavior";
 import NPCAction from "./NPCAction";
 

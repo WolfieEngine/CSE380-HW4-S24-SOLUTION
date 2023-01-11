@@ -1,4 +1,4 @@
-import NPCActor from "../NPCActor";
+import NPCActor from "../../../Actors/NPCActor";
 import NPCBehavior from "../NPCBehavior";
 import GoalReached from "../NPCStatuses/FalseStatus";
 import GameEvent from "../../../../Wolfie2D/Events/GameEvent";

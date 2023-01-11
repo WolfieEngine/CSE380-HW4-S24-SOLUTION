@@ -1,6 +1,6 @@
 import GoapState from "../../../../Wolfie2D/AI/Goap/GoapState";
 import MathUtils from "../../../../Wolfie2D/Utils/MathUtils";
-import NPCActor from "../NPCActor";
+import NPCActor from "../../../Actors/NPCActor";
 
 export class HasHealth extends GoapState {
 

@@ -2,7 +2,7 @@ import GoapState from "../../../../Wolfie2D/AI/Goap/GoapState";
 import Item from "../../../GameSystems/ItemSystem/Item";
 import Finder from "../../../GameSystems/Searching/Finder";
 
-import NPCActor from "../NPCActor";
+import NPCActor from "../../../Actors/NPCActor";
 
 export class HasItem extends GoapState {
     protected actor: NPCActor;
