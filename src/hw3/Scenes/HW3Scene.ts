@@ -219,6 +219,8 @@ export default class HW3Scene extends Scene {
 
         // Start the player in the "IDLE" animation
         this.player.animation.play("IDLE");
+
+        this.battlers.push(this.player);
     }
     /**
      * Initialize the NPCs 
@@ -263,7 +265,7 @@ export default class HW3Scene extends Scene {
             npc.navkey = "navmesh";
 
             // Give the NPCs their AI
-            npc.addAI(GuardBehavior, {target: this.battlers[0], range: 25});
+            npc.addAI(GuardBehavior, {target: this.battlers[1], range: 25});
 
             // Play the NPCs "IDLE" animation 
             npc.animation.play("IDLE");

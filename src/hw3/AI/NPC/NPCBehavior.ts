@@ -1,6 +1,7 @@
 import StateMachineGoapAI from "../../../Wolfie2D/AI/Goap/StateMachineGoapAI";
 import GameEvent from "../../../Wolfie2D/Events/GameEvent";
 import GameNode from "../../../Wolfie2D/Nodes/GameNode";
+import NPCActor from "../../Actors/NPCActor";
 import NPCAction from "./NPCActions/NPCAction";
 
 
@@ -10,7 +11,7 @@ import NPCAction from "./NPCActions/NPCAction";
  */
 export default abstract class NPCBehavior extends StateMachineGoapAI<NPCAction>  {
 
-    public initializeAI(owner: GameNode, options: Record<string, any>): void {
+    public initializeAI(owner: NPCActor, options: Record<string, any>): void {
         this.owner = owner;
     }
 

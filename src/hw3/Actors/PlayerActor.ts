@@ -6,6 +6,8 @@ import Battler from "../GameSystems/BattleSystem/Battler";
 import HW3Battler from "../GameSystems/BattleSystem/HW3Battler";
 import Inventory from "../GameSystems/ItemSystem/Inventory";
 import HW3Item from "../GameSystems/ItemSystem/Item";
+import BasicTargetable from "../GameSystems/Targeting/BasicTargetable";
+import { TargetableEntity } from "../GameSystems/Targeting/TargetableEntity";
 import { TargetingEntity } from "../GameSystems/Targeting/TargetingEntity";
 import HW3Scene from "../Scenes/HW3Scene";
 
@@ -17,31 +19,28 @@ export default class PlayerActor extends AnimatedSprite implements HW3Battler {
 
     /** Give the player a battler compoonent */
     protected battler: Battler;
-    protected _heldItem: HW3Item;
+    protected targetable: TargetableEntity;
+
+    protected heldItem: HW3Item;
 
     constructor(sheet: Spritesheet) {
         super(sheet);
         this.battler = new BasicBattler();
+        this.targetable = new BasicTargetable(this.position);
     }
     get battlerActive(): boolean {
-        throw new Error("Method not implemented.");
+        return this.battler.battlerActive;
     }
     set battlerActive(value: boolean) {
-        throw new Error("Method not implemented.");
+        this.battler.battlerActive = value;
     }
     
-    getTargeting(): TargetingEntity[] {
-        throw new Error("Method not implemented.");
-    }
-    addTargeting(targeting: TargetingEntity): void {
-        throw new Error("Method not implemented.");
-    }
-    removeTargeting(targeting: TargetingEntity): void {
-        throw new Error("Method not implemented.");
-    }
+    public getTargeting(): TargetingEntity[] { return this.targetable.getTargeting(); }
+    public addTargeting(targeting: TargetingEntity): void { this.targetable.addTargeting(targeting); }
+    public removeTargeting(targeting: TargetingEntity): void { this.targetable.removeTargeting(targeting); }
 
-    public setScene(scene: HW3Scene): void { this.scene = scene; }
-    public getScene(): HW3Scene { return this.scene; }
+    public override setScene(scene: HW3Scene): void { this.scene = scene; }
+    public override getScene(): HW3Scene { return this.scene; }
 
     get battleGroup(): number {
         return this.battler.battleGroup;
