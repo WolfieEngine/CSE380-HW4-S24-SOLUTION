@@ -1,23 +1,22 @@
-import GoapStatus from "../../../../Wolfie2D/AI/Goap/GoapStatus";
+import GoapState from "../../../../Wolfie2D/AI/Goap/GoapState";
+import MathUtils from "../../../../Wolfie2D/Utils/MathUtils";
 import NPCActor from "../NPCActor";
 
-export default class HasHealth extends GoapStatus {
+export class HasHealth extends GoapState {
 
-    public static readonly HEALTH = 0;
+    protected actor: NPCActor;
+    protected min: number;
+    protected max: number;
 
-    protected _health: number;
-
-    public constructor(key: string) {
-        super(key);
-        this.health = HasHealth.HEALTH;
+    public constructor(actor: NPCActor, min: number, max: number) {
+        super()
+        this.actor = actor;
+        this.min = min;
+        this.max = max;
     }
 
-    public get health() { return this._health; }
-    public set health(health: number) { this._health = health;}
-
-    public checkProceduralPreconditions(actor: NPCActor): boolean {
-        return actor.health > this.health;
+    public isSatisfied(): boolean {
+        return MathUtils.between(this.min, this.max, this.actor.health, true);
     }
-
+    
 }
-

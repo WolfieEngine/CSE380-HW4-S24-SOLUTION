@@ -1,6 +1,4 @@
-import { GoapActionStatus } from "../../../../Wolfie2D/AI/Goap/GoapAction";
-import Vec2 from "../../../../Wolfie2D/DataTypes/Vec2";
-import NPCActor from "../NPCActor";
+import GameEvent from "../../../../Wolfie2D/Events/GameEvent";
 import NPCAction from "./NPCAction";
 
 /**
@@ -9,8 +7,12 @@ import NPCAction from "./NPCAction";
  */
 export default class IdleAction extends NPCAction {
 
-    public planAction(actor: NPCActor): void {}
+    onEnter(options: Record<string, any>): void {}
 
-    public performAction(actor: NPCActor): GoapActionStatus { return GoapActionStatus.SUCCESS; }
+    update(deltaT: number): void {
+        this.finished();
+    }
+
+    onExit(): Record<string, any> { return {} }
     
 }

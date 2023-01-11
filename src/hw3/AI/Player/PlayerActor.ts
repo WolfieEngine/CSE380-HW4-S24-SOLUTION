@@ -1,45 +1,73 @@
 import Spritesheet from "../../../Wolfie2D/DataTypes/Spritesheet";
 import AnimatedSprite from "../../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import { ItemEvent } from "../../Events";
+import BasicBattler from "../../GameSystems/BattleSystem/BasicBattler";
+import Battler from "../../GameSystems/BattleSystem/Battler";
+import HW3Battler from "../../GameSystems/BattleSystem/HW3Battler";
 import Inventory from "../../GameSystems/ItemSystem/Inventory";
 import HW3Item from "../../GameSystems/ItemSystem/Item";
+import { TargetingEntity } from "../../GameSystems/Targeting/TargetingEntity";
 import HW3Scene from "../../Scenes/HW3Scene";
-import Battler from "../Battler";
 
-export default class PlayerActor extends AnimatedSprite implements Battler {
+
+export default class PlayerActor extends AnimatedSprite implements HW3Battler {
 
     /** Override the type of the scene to be the HW3 scene */
     protected scene: HW3Scene
 
-    // Add our NPC stats 
-    protected _maxHealth: number;
-    protected _health: number;
-    protected _battleGroup: number;
-    
-    protected _speed: number;
-    protected _inventory: Inventory;
+    /** Give the player a battler compoonent */
+    protected battler: Battler;
     protected _heldItem: HW3Item;
 
     constructor(sheet: Spritesheet) {
         super(sheet);
-        this.inventory = new Inventory();
+        this.battler = new BasicBattler();
+    }
+    get battlerActive(): boolean {
+        throw new Error("Method not implemented.");
+    }
+    set battlerActive(value: boolean) {
+        throw new Error("Method not implemented.");
+    }
+    
+    getTargeting(): TargetingEntity[] {
+        throw new Error("Method not implemented.");
+    }
+    addTargeting(targeting: TargetingEntity): void {
+        throw new Error("Method not implemented.");
+    }
+    removeTargeting(targeting: TargetingEntity): void {
+        throw new Error("Method not implemented.");
     }
 
-    public get battleGroup(): number { return this._battleGroup; }
-    public set battleGroup(battleGroup: number) { this._battleGroup = battleGroup; }
+    public setScene(scene: HW3Scene): void { this.scene = scene; }
+    public getScene(): HW3Scene { return this.scene; }
 
-    public get maxHealth(): number { return this._maxHealth; }
-    public set maxHealth(maxHealth: number) { this._maxHealth = maxHealth; }
-
-    public get health(): number { return this._health; }
-    public set health(health: number) { this._health = health; }
-
-    public get speed(): number { return this._speed; }
-    public set speed(speed: number) { this._speed = speed; }
-
-    setScene(scene: HW3Scene): void { this.scene = scene; }
-    getScene(): HW3Scene { return this.scene; }
-
-    public get inventory(): Inventory { return this._inventory; }
-    protected set inventory(inventory: Inventory) { this._inventory = inventory; }
+    get battleGroup(): number {
+        return this.battler.battleGroup;
+    }
+    set battleGroup(value: number) {
+        this.battler.battleGroup = value;
+    }
+    get maxHealth(): number {
+        return this.battler.maxHealth;
+    }
+    set maxHealth(value: number) {
+        this.battler.maxHealth = value;
+    }
+    get health(): number {
+        return this.battler.health;
+    }
+    set health(value: number) {
+        this.battler.health = value;
+    }
+    get speed(): number {
+        return this.battler.speed;
+    }
+    set speed(value: number) {
+        this.battler.speed = value;
+    }
+    get inventory(): Inventory {
+        return this.battler.inventory;
+    }
 }

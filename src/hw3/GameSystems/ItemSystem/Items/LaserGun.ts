@@ -18,7 +18,7 @@ export default class LaserGun extends Item {
     protected _laser: Line
     protected _direction: Vec2;
 
-    protected constructor(sprite: Sprite, laser: Line) {
+    public constructor(sprite: Sprite, laser: Line) {
         super(sprite);
         this._laser = laser;
         this._laser.start.copy(Vec2.ZERO_STATIC);

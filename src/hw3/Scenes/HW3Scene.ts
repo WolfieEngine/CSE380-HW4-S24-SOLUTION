@@ -29,9 +29,14 @@ import LaserGun from "../GameSystems/ItemSystem/Items/LaserGun";
 import { GraphicType } from "../../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import Line from "../../Wolfie2D/Nodes/Graphics/Line";
 import Healthpack from "../GameSystems/ItemSystem/Items/Healthpack";
-import HW3Item from "../GameSystems/ItemSystem/Item";
-import Battler from "../AI/Battler";
 import NPCActor from "../AI/NPC/NPCActor";
+import GruntBehavior from "../AI/NPC/NPCBehavior/GaurdBehavior";
+import Viewport from "../../Wolfie2D/SceneGraph/Viewport";
+import RenderingManager from "../../Wolfie2D/Rendering/RenderingManager";
+import SceneManager from "../../Wolfie2D/Scene/SceneManager";
+import NPCBehavior from "../AI/NPC/NPCBehavior";
+import HW3Battler from "../GameSystems/BattleSystem/HW3Battler";
+import GuardBehavior from "../AI/NPC/NPCBehavior/GaurdBehavior";
 
 
 export default class HW3Scene extends Scene {
@@ -43,11 +48,7 @@ export default class HW3Scene extends Scene {
     /** GameNodes in the HW3 Scene */
     private player: PlayerActor;
 
-    private redEnemies: Array<NPCActor>;
-    private blueEnemies: Array<NPCActor>;
-
-    private redHealers: Array<NPCActor>;
-    private blueHealers: Array<NPCActor>;
+    private battlers: HW3Battler[];
 
     private healthpacks: Array<Healthpack>;
     private laserguns: Array<LaserGun>;
@@ -58,6 +59,13 @@ export default class HW3Scene extends Scene {
     // The position graph for the navmesh
     private graph: PositionGraph;
 
+    public constructor(viewport: Viewport, sceneManager: SceneManager, renderingManager: RenderingManager, options: Record<string, any>) {
+        super(viewport, sceneManager, renderingManager, options);
+
+        this.battlers = new Array<HW3Battler>();
+        this.laserguns = new Array<LaserGun>();
+        this.healthpacks = new Array<Healthpack>();
+    }
 
     /**
      * @see Scene.update()
@@ -200,6 +208,8 @@ export default class HW3Scene extends Scene {
         this.player = this.add.animatedSprite(PlayerActor, "player1", "primary");
         this.player.position.set(40, 40);
 
+        this.player.battleGroup = 2;
+
         // Give the player physics
         this.player.addPhysics(new AABB(Vec2.ZERO, new Vec2(8, 8)));
         // Give the player a healthbar
@@ -218,82 +228,84 @@ export default class HW3Scene extends Scene {
         // Get the object data for the red enemies
         let red = this.load.getObject("red");
 
-        // Initialize the red enemies
-        this.redEnemies = new Array<NPCActor>(red.enemies.length);
+        // Initialize the red healers
         for (let i = 0; i < 1; i++) {
-            this.redEnemies[i] = this.add.animatedSprite(NPCActor, "RedEnemy", "primary");
-            this.redEnemies[i].position.set(red.enemies[i][0], red.enemies[i][1]);
-            this.redEnemies[i].addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
+            let npc = this.add.animatedSprite(NPCActor, "RedHealer", "primary");
+            npc.position.set(red.healers[i][0], red.healers[i][1]);
+            npc.addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
+
+            npc.battleGroup = 1;
+            npc.speed = 10;
+            npc.health = 10;
+            npc.maxHealth = 10;
+            npc.navkey = "navmesh";
+
+            this.healthbarManager.register(npc, npc.size.clone());
+
+            npc.addAI(HealerBehavior);
+            npc.animation.play("IDLE");
+            this.battlers.push(npc);
+        }
+
+        for (let i = 0; i < 1; i++) {
+            let npc = this.add.animatedSprite(NPCActor, "RedEnemy", "primary");
+            npc.position.set(red.enemies[i][0], red.enemies[i][1]);
+            npc.addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
 
             // Give the NPCS their healthbars
-            this.healthbarManager.register(this.redEnemies[i], this.redEnemies[i].size.clone());
-            // Give the NPCs their GOAP 
-
-            this.redEnemies[i].speed = 10;
-            this.redEnemies[i].health = 1;
-            this.redEnemies[i].maxHealth = 10;
-            this.redEnemies[i].navkey = "navmesh";
+            this.healthbarManager.register(npc, npc.size.clone());
+            
+            // Set the NPCs stats
+            npc.battleGroup = 1
+            npc.speed = 10;
+            npc.health = 1;
+            npc.maxHealth = 10;
+            npc.navkey = "navmesh";
 
             // Give the NPCs their AI
-            this.redEnemies[i].addAI(IdleBehavior);
+            npc.addAI(GuardBehavior, {target: this.battlers[0], range: 25});
 
             // Play the NPCs "IDLE" animation 
-            this.redEnemies[i].animation.play("IDLE");
-        }
-        // Initialize the red healers
-        this.redHealers = new Array<NPCActor>(red.healers.length);
-        for (let i = 0; i < 1; i++) {
-            this.redHealers[i] = this.add.animatedSprite(NPCActor, "RedHealer", "primary");
-            this.redHealers[i].position.set(red.healers[i][0], red.healers[i][1]);
-            this.redHealers[i].addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
-
-            this.redHealers[i].speed = 10;
-            this.redHealers[i].health = 10;
-            this.redHealers[i].maxHealth = 10;
-            this.redHealers[i].navkey = "navmesh";
-
-            this.healthbarManager.register(this.redHealers[i], this.redHealers[i].size.clone());
-
-            // this.redHealers[i].addAI(HealerBehavior);
-            this.redHealers[i].animation.play("IDLE");
+            npc.animation.play("IDLE");
+            // Add the NPC to the battlers array
+            this.battlers.push(npc);
         }
 
         // Get the object data for the blue enemies
         let blue = this.load.getObject("blue");
 
         // Initialize the blue enemies
-        this.blueEnemies = new Array<NPCActor>(blue.enemies.length);
         // for (let i = 0; i < blue.enemies.length; i++) {
-        //     this.blueEnemies[i] = this.add.animatedSprite(NPCActor, "BlueEnemy", "primary");
-        //     this.blueEnemies[i].position.set(blue.enemies[i][0], blue.enemies[i][1]);
-        //     this.blueEnemies[i].addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
+        //     let npc = this.add.animatedSprite(NPCActor, "BlueEnemy", "primary");
+        //     npc.position.set(blue.enemies[i][0], blue.enemies[i][1]);
+        //     npc.addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
 
         //     // Give the NPCS their healthbars
-        //     this.healthbarManager.register(this.blueEnemies[i], this.blueEnemies[i].size.clone());
+        //     this.healthbarManager.register(npc, npc.size.clone());
 
         //     // Give the NPCs their AI
-        //     this.blueEnemies[i].addAI(NPCBehavior);
+        //     npc.addAI(GruntBehavior);
 
         //     // Play the NPCs "IDLE" animation 
-        //     this.blueEnemies[i].animation.play("IDLE");
+        //     npc.animation.play("IDLE");
+
+        //     this.battlers.push(npc);
         // }
 
         // Initialize the blue healers
-        this.blueHealers = new Array<NPCActor>(blue.healers.length);
         // for (let i = 0; i < blue.healers.length; i++) {
-        //     this.blueHealers[i] = this.add.animatedSprite(NPCActor, "BlueHealer", "primary");
-        //     this.blueHealers[i].position.set(blue.healers[i][0], blue.healers[i][1]);
-        //     this.blueHealers[i].addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
+        //     let npc = this.add.animatedSprite(NPCActor, "BlueHealer", "primary");
+        //     npc.position.set(blue.healers[i][0], blue.healers[i][1]);
+        //     npc.addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
 
-        //     this.healthbarManager.register(this.blueHealers[i], this.blueHealers[i].size.clone());
+        //     this.healthbarManager.register(npc, npc.size.clone());
 
-        //     this.blueHealers[i].addAI(NPCBehavior);
-        //     this.blueHealers[i].animation.play("IDLE");
+        //     npc.addAI(HealerBehavior);
+        //     npc.animation.play("IDLE");
+        //     this.battlers.push(npc);
         // }
 
-        for (let i = 0; i < 1; i++) {
-            this.redHealers[i].addAI(HealerBehavior);
-        }
+
     }
     /**
      * Initialize the items in the scene (healthpacks and laser guns)
@@ -312,7 +324,7 @@ export default class HW3Scene extends Scene {
         this.healthpacks = new Array<Healthpack>(healthpacks.items.length);
         for (let i = 0; i < healthpacks.items.length; i++) {
             let sprite = this.add.sprite("healthpack", "primary");
-            this.healthpacks[i] = Healthpack.create(sprite);
+            this.healthpacks[i] = new Healthpack(sprite);
             this.healthpacks[i].position.set(healthpacks.items[i][0], healthpacks.items[i][1]);
         }
     }
@@ -377,27 +389,20 @@ export default class HW3Scene extends Scene {
         this.navManager.addNavigableEntity("navmesh", navmesh);
     }
 
-    public getBattlers(): Array<Battler> {
-        return new Array<Battler>(
-            this.redEnemies[0], 
-            this.player
-        );
+    public getBattlers(): HW3Battler[] {
+        return this.battlers;
     }
 
     public getWalls(): OrthogonalTilemap {
         return this.walls;
     }
 
-    public getHealthpacks(): IterableIterator<Healthpack>{
-        return this.healthpacks.values();
+    public getHealthpacks(): Healthpack[] {
+        return this.healthpacks;
     }
 
-    public getLaserGuns(): IterableIterator<LaserGun> {
-        return this.laserguns.values();
-    }
-
-    public getItems(): IterableIterator<HW3Item> {
-        return new Array<HW3Item>().concat(...this.healthpacks).concat(...this.laserguns).values()
+    public getLaserGuns(): LaserGun[] {
+        return this.laserguns;
     }
 
     /**
