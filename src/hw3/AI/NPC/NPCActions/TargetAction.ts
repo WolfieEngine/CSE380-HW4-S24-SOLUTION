@@ -1,7 +1,7 @@
 import GameEvent from "../../../../Wolfie2D/Events/GameEvent";
 import Finder from "../../../GameSystems/Searching/Finder";
 import { TargetableEntity } from "../../../GameSystems/Targeting/TargetableEntity";
-import NPCActor from "../NPCActor";
+import NPCActor from "../../../Actors/NPCActor";
 import NPCBehavior from "../NPCBehavior";
 import NPCAction from "./NPCAction";
 

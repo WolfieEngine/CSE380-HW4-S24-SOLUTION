@@ -1,5 +1,5 @@
 import IdleAction from "../NPCActions/IdleAction";
-import NPCActor from "../NPCActor";
+import NPCActor from "../../../Actors/NPCActor";
 import NPCBehavior from "../NPCBehavior";
 import GoalReached from "../NPCStatuses/FalseStatus";
 

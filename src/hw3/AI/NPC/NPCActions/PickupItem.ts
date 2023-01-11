@@ -1,5 +1,5 @@
 import GameEvent from "../../../../Wolfie2D/Events/GameEvent";
-import NPCActor from "../NPCActor";
+import NPCActor from "../../../Actors/NPCActor";
 import NPCBehavior from "../NPCBehavior";
 import NPCAction from "./NPCAction";
 import Item from "../../../GameSystems/ItemSystem/Item";

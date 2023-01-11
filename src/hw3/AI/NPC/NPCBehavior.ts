@@ -23,7 +23,6 @@ export default abstract class NPCBehavior extends StateMachineGoapAI<NPCAction> 
     /**
      * If there are any events all NPCs need to handle, regardless of their behavior, you should
      * catch and handle those events here.
-     * 
      * @param event the game event
      */
     public handleEvent(event: GameEvent): void {

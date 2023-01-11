@@ -1,6 +1,6 @@
 import IdleAction from "../NPCActions/IdleAction";
 import PickupHealthpack from "../NPCActions/PickupItem";
-import NPCActor from "../NPCActor";
+import NPCActor from "../../../Actors/NPCActor";
 import NPCBehavior from "../NPCBehavior";
 import GoalReached from "../NPCStatuses/FalseStatus";
 import Idle from "../NPCActions/IdleAction";
@@ -114,13 +114,6 @@ export default class GuardBehavior extends NPCBehavior {
 
     public update(deltaT: number): void {
         super.update(deltaT);
-
-        let states = this.stateMap.keys();
-        for (let key in states) {
-            if (this.stateMap.get(key) === this.currentState) {
-                console.log("Current guard state: " + key);
-            }
-        }
     }
 
     protected initializeStatuses(): void {
@@ -162,28 +155,28 @@ export default class GuardBehavior extends NPCBehavior {
         let owner = this.owner;
 
         // An action for targeting an enemy in the guard's guard area
-        // let findEnemyInGuardArea = new BasicFinder<HW3Battler>(ClosestPositioned(owner), BattlerGroupFilter([owner.battleGroup], false), RangeFilter(this.target, 0, this.range*this.range));
-        // let targetEnemyInGuardArea = new TargetAction(this, this._owner, scene.getBattlers(), findEnemyInGuardArea);
-        // targetEnemyInGuardArea.cost = 5;
-        // targetEnemyInGuardArea.addPrecondition(GuardStatuses.ENEMY_IN_GUARD_POSITION);
-        // targetEnemyInGuardArea.addEffect(GuardStatuses.ENEMY_TARGETED);
-        // this.addState(GuardActions.TARGET_ENEMY, targetEnemyInGuardArea)
+        let findEnemyInGuardArea = new BasicFinder<HW3Battler>(ClosestPositioned(owner), BattlerGroupFilter([owner.battleGroup], false), RangeFilter(this.target, 0, this.range*this.range));
+        let targetEnemyInGuardArea = new TargetAction(this, this.owner, scene.getBattlers(), findEnemyInGuardArea);
+        targetEnemyInGuardArea.cost = 5;
+        targetEnemyInGuardArea.addPrecondition(GuardStatuses.ENEMY_IN_GUARD_POSITION);
+        targetEnemyInGuardArea.addEffect(GuardStatuses.ENEMY_TARGETED);
+        this.addState(GuardActions.TARGET_ENEMY, targetEnemyInGuardArea)
 
         // An action for going to an enemy
-        // let gotoEnemy = new GotoAction(this, this._owner);
-        // gotoEnemy.cost = 2;
-        // gotoEnemy.addPrecondition(GuardStatuses.ENEMY_TARGETED);
-        // gotoEnemy.addEffect(GuardStatuses.AT_ENEMY);
-        // this.addState(GuardActions.GOTO_ENEMY, gotoEnemy);
+        let gotoEnemy = new GotoAction(this, this.owner);
+        gotoEnemy.cost = 2;
+        gotoEnemy.addPrecondition(GuardStatuses.ENEMY_TARGETED);
+        gotoEnemy.addEffect(GuardStatuses.AT_ENEMY);
+        this.addState(GuardActions.GOTO_ENEMY, gotoEnemy);
 
         // An action for shooting an enemy
-        // let shootEnemy = new ShootLaserGun(this, this._owner);
-        // shootEnemy.addPrecondition(GuardStatuses.HAS_LASERGUN);
-        // shootEnemy.addPrecondition(GuardStatuses.AT_ENEMY);
-        // shootEnemy.addPrecondition(GuardStatuses.ENEMY_TARGETED);
-        // shootEnemy.addEffect(GuardStatuses.GOAL);
-        // shootEnemy.cost = 2;
-        // this.addState(GuardActions.SHOOT_ENEMY, shootEnemy);
+        let shootEnemy = new ShootLaserGun(this, this.owner);
+        shootEnemy.addPrecondition(GuardStatuses.HAS_LASERGUN);
+        shootEnemy.addPrecondition(GuardStatuses.AT_ENEMY);
+        shootEnemy.addPrecondition(GuardStatuses.ENEMY_TARGETED);
+        shootEnemy.addEffect(GuardStatuses.GOAL);
+        shootEnemy.cost = 2;
+        this.addState(GuardActions.SHOOT_ENEMY, shootEnemy);
 
         // An action for targeting a lasergun - target the closest visible lasergun
         let lasergunFinder = new BasicFinder<Item>(ClosestPositioned(owner), VisibleItemFilter(), ItemFilter(LaserGun));

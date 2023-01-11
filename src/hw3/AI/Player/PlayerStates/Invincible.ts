@@ -1,6 +1,6 @@
 import GameEvent from "../../../../Wolfie2D/Events/GameEvent";
 import Timer from "../../../../Wolfie2D/Timing/Timer";
-import PlayerActor from "../PlayerActor";
+import PlayerActor from "../../../Actors/PlayerActor";
 import PlayerAI from "../PlayerAI";
 import PlayerState, { PlayerStateType } from "./PlayerState";
 
