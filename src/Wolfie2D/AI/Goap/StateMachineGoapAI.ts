@@ -4,8 +4,9 @@ import GoapActionPlanner from "./GoapActionPlanner"
 import GameEvent from "../../Events/GameEvent";
 import GameNode from "../../Nodes/GameNode";
 import AI from "../../DataTypes/Interfaces/AI";
+import Map from "../../DataTypes/Collections/Map";
 import Actor from "../../DataTypes/Interfaces/Actor";
-import GoapStatus from "./GoapStatus";
+import GoapState from "./GoapState";
 import StateMachineAI from "../StateMachineAI";
 
 /**
@@ -13,6 +14,10 @@ import StateMachineAI from "../StateMachineAI";
  * 
  * GOAP requires a lot of overhead for managing all of the symbols (statuses and goals), the
  * actual goap-actions, and creating the action plans. 
+ * 
+ * I've opted to try and extend the StateMachineAI for this class, mostly to try and keep things
+ * similar to the StateMachineAI. My StateMachineGoapAI class kind of breaks LSP (Liskov's substitution principle)
+ * which cues me into the fact that I should probably make a seperate class.
  * 
  * Something I'd like to add is an additional class for managing a set of goals. The goals 
  * are pretty similar to statuses, except that goals have some kind off priority associated
@@ -23,67 +28,88 @@ import StateMachineAI from "../StateMachineAI";
 export default abstract class StateMachineGoapAI<T extends GoapAction> extends StateMachineAI {
 
     /** The parent Actor of this GoapAI */
-    protected owner: GameNode | null;
+    protected owner: GameNode;
 
     /** The goal/status we're trying to reach */
-    protected _goal: GoapStatus;
-
+    protected goal: string;
     /** All statuses for this GoapAI */
-    protected _statuses: Map<string, GoapStatus>
-
-    /** All actions for this GoapAI */
-    protected _actions: Map<string, T>
-
-    /** The current action we're trying to perfrom */
-    protected _currentAction: T | null;
-
-    /** A Stack of GoapActions representing this goap objects current plan */
-    protected _plan: Stack<T>;
+    protected statuses: Map<GoapState>
+    /** All of the action the GOAP AI can perform */
+    protected stateMap: Map<T>;
 
     public constructor() {
         super();
-        this._statuses = new Map<string, GoapStatus>();
-        this._actions = new Map<string, T>();
-        this._plan = new Stack<T>();
-        this._goal = null;
+        this.statuses = new Map<GoapState>();
+        this.stateMap = new Map<T>();
+        this.stack = new Stack<T>();
+        this.goal = null;
     }
 
-    public getOwner(): GameNode { return this.owner; }
-
-    public abstract initializeAI(owner: GameNode, options: Record<string, any>): void;
 
     public update(deltaT: number): void {
         super.update(deltaT);
     }
 
-    // Checks if the owner has reached their goal
-    public goalReached(): boolean {
-        return this._goal.checkProceduralPreconditions(this.owner);
+    public override initialize(): void {
+        // Initialize the AI by building a plan from the the current actions
+        this.stack = this.buildPlan();
+        this.currentState = this.stack.peek();
+        this.currentState.onEnter({});
+        this.setActive(true);
     }
 
-    public buildPlan(): Stack<T> {
+    // NOTE; this method might trigger infinite recursion in your GOAP AI - Peteylumpkins
+    public override changeState(): void {
+        // Exit the current state
+        let options = this.currentState.onExit();
+
+        // Remove the previous state
+        this.stack.pop();
+
+        // If the plan is empty, build a new plan
+        if (this.stack.isEmpty()) {
+            this.stack = this.buildPlan();
+        }
+
+        // Set the current action
+        this.currentState = this.stack.peek();
+
+        // Emit an event if turned on
+        if(this.emitEventOnStateChange){
+            this.emitter.fireEvent(this.stateChangeEventName, {state: this.currentState});
+        }
+
+        // Enter the new action
+        this.currentState.onEnter(options);
+    }
+   
+    protected buildPlan(): Stack<T> {
         // Get all the current statuses
-        let statuses = Array.from(this._statuses.values()).filter(stat => stat.checkProceduralPreconditions(this.owner)).map(stat => stat.key);
-        // Get all the current actions and plan them out
-        let actions = Array.from(this._actions.values())
-        actions.forEach(action => action.planAction(this.owner));
+        let statuses = this.currentStatus();
+        // Get all the current actions
+        let actions = Array.from(this.stateMap.keys()).map(key => this.stateMap.get(key));
         // Create the plan
-        return GoapActionPlanner.plan<T>(statuses, this._goal.key, actions);
+        return GoapActionPlanner.plan<T>(statuses, this.goal, actions);
     }
 
-    public setPlan(plan: Stack<T>): void { this._plan = plan; }
-    public getPlan(): Stack<T> { return this._plan; }
-
-    public set goal(goal: string) { 
-        this._goal = this._statuses.get(goal);
+    public currentStatus(): string[] {
+        return Array.from(this.statuses.keys()).filter(stat => this.statuses.get(stat).isSatisfied());
     }
 
-    public addStatus(status: GoapStatus): void {
-        this._statuses.set(status.key, status);
+    public setGoal(goal: string) { 
+        if (!this.statuses.has(goal)) {
+            throw new Error("Goal doesn't exist. Make sure your goal is a status for this GOAP AI")
+        }   
+        this.goal = goal;
     }
 
-    public addAction(action: T): void {
-        this._actions.set(action.key, action);
+    public addStatus(statusName: string, status: GoapState): void {
+        this.statuses.set(statusName, status);
     }
+
+    public addState(stateName: string, state: GoapAction): void {
+        super.addState(stateName, state);
+    }
+
 
 }

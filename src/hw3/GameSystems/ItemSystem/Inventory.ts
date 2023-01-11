@@ -1,6 +1,7 @@
 import Unique from "../../../Wolfie2D/DataTypes/Interfaces/Unique";
 import Emitter from "../../../Wolfie2D/Events/Emitter";
 import Item from "./Item";
+import Healthpack from "./Items/Healthpack";
 
 /**
  * An inventory is a collection of items. All items in the inventory must be registered with
@@ -125,39 +126,19 @@ export default class Inventory implements Unique {
         return item;
     }
 
-    /**
-     * Finds the first item in this inventory that meets the given condition.
-     * @param pred the predicate function (the condition)
-     * @returns 
-     */
-    public find(pred: (item: Item) => boolean): Item | null {
-       let item: Item = Array.from(this.inventory.values()).find(pred);
-       return item === undefined ? null : item;
+    public items(): IterableIterator<Item> {
+        return this.inventory.values()
     }
 
-    /**
-     * Finds and returns all Items in the Inventory that meet the given condition
-     * @param pred the predicate function
-     * @returns a list of Items
-     */
-    public findAll(pred: (item: Item) => boolean): Item[] | [] {
-        return Array.from(this.inventory.values()).filter(pred);
-    }
-
-    /**
-     * Applies the given function to each item in the Inventory
-     * @param func the function
-     */
-    public forEach(func: (item: Item) => void): void {
-        for (let item of this.inventory.values()) {
-            func(item);
-        }
+    public find(func: (item: Item) => boolean): Item | null {
+        let item = Array.from(this.inventory.values()).find(func);
+        return item === undefined ? null : item;
     }
 
     public clean(): void {
         this.dirty = false;
         if (this.onChange !== null) {
-            this.emitter.fireEvent(this.onChange, {id: this.id});
+            this.emitter.fireEvent(this.onChange, { id: this.id, inventory: this });
         }
     }
 }

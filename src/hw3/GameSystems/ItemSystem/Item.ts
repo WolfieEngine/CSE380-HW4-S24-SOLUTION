@@ -1,27 +1,46 @@
+import Unique from "../../../Wolfie2D/DataTypes/Interfaces/Unique";
 import Vec2 from "../../../Wolfie2D/DataTypes/Vec2";
 import Emitter from "../../../Wolfie2D/Events/Emitter";
 import GameNode from "../../../Wolfie2D/Nodes/GameNode";
 import Sprite from "../../../Wolfie2D/Nodes/Sprites/Sprite";
 import Layer from "../../../Wolfie2D/Scene/Layer";
 import Scene from "../../../Wolfie2D/Scene/Scene";
+import BasicTargetable from "../Targeting/BasicTargetable";
+import BasicTargeting from "../Targeting/BasicTargeting";
+
 import HW3Scene from "../../Scenes/HW3Scene";
 import Inventory from "./Inventory";
+import { TargetableEntity } from "../Targeting/TargetableEntity";
+import { TargetingEntity } from "../Targeting/TargetingEntity";
 
 
-export default abstract class HW3Item {
+export default abstract class Item implements Unique, TargetableEntity {
 
     protected sprite: Sprite;
-
-    protected _inventory: Inventory | null;
-
-
     protected emitter: Emitter;
 
-    public constructor(sprite: Sprite){ 
+    protected _inventory: Inventory | null;
+    protected _targetable: TargetableEntity;
+
+    protected constructor(sprite: Sprite){ 
         this.sprite = sprite;
-        this._inventory = null;
         this.emitter = new Emitter();
+
+        this._inventory = null;
+        this._targetable = new BasicTargetable(this.sprite.position);
     }
+
+    getTargeting(): TargetingEntity[] { 
+        return this._targetable.getTargeting(); 
+    }
+    addTargeting(targeting: TargetingEntity): void {
+        this._targetable.addTargeting(targeting);
+    }
+    removeTargeting(targeting: TargetingEntity): void {
+        this._targetable.removeTargeting(targeting);
+    }
+    
+    public get relativePosition(): Vec2 { return this.sprite.relativePosition; }
 
     public get id(): number { return this.sprite.id; }
 

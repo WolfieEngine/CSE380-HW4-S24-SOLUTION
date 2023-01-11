@@ -1,11 +1,11 @@
-import Physical from "../../Wolfie2D/DataTypes/Interfaces/Physical";
-import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
-import Inventory from "../GameSystems/ItemSystem/Inventory";
+import Positioned from "../../../Wolfie2D/DataTypes/Interfaces/Positioned";
+import Vec2 from "../../../Wolfie2D/DataTypes/Vec2";
+import Inventory from "../ItemSystem/Inventory";
 
 /**
  * An interface for a Battler
  */
-export default interface Battler extends Physical {
+export default interface Battler extends Positioned {
 
     /** The Battlers group number */
     get battleGroup(): number;
@@ -28,5 +28,10 @@ export default interface Battler extends Physical {
 
     /** The battlers position */
     get position(): Vec2;
+    set position(value: Vec2);
+
+    /** Whether the battler is active or not */
+    get battlerActive(): boolean;
+    set battlerActive(value: boolean);
 
 }

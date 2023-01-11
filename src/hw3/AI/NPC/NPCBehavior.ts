@@ -1,10 +1,8 @@
 import StateMachineGoapAI from "../../../Wolfie2D/AI/Goap/StateMachineGoapAI";
+import GameEvent from "../../../Wolfie2D/Events/GameEvent";
+import GameNode from "../../../Wolfie2D/Nodes/GameNode";
 import NPCAction from "./NPCActions/NPCAction";
-import NPCActor from "./NPCActor";
 
-import Acting from "./NPCStates/Acting";
-import Planning from "./NPCStates/Planning";
-import Moving from "./NPCStates/Moving";
 
 /**
  * An abstract implementation of behavior for an NPC. Each concrete implementation of the
@@ -12,18 +10,31 @@ import Moving from "./NPCStates/Moving";
  */
 export default abstract class NPCBehavior extends StateMachineGoapAI<NPCAction>  {
 
-    /** The GameNode that owns this NPCGoapAI */
-    protected owner: NPCActor;
-    
-    /** Initialize the NPC AI */
-    public initializeAI(owner: NPCActor, opts: Record<string, any>): void {
+    public initializeAI(owner: GameNode, options: Record<string, any>): void {
         this.owner = owner;
-
-        this.addState("PLANNING", new Planning(this, this.owner));
-        this.addState("MOVING", new Moving(this, this.owner));
-        this.addState("ACTING", new Acting(this, this.owner));
-
-        this.initialize("PLANNING");
     }
 
+    public activate(options: Record<string, any>): void {}
+
+    public update(deltaT: number): void {
+        super.update(deltaT);
+    }
+
+    /**
+     * If there are any events all NPCs need to handle, regardless of their behavior, you should
+     * catch and handle those events here.
+     * 
+     * @param event the game event
+     */
+    public handleEvent(event: GameEvent): void {
+        switch(event.type) {
+            default: {
+                super.handleEvent(event);
+                break;
+            }
+        }
+    }
+
+
+    
 }
