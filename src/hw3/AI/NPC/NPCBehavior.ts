@@ -11,6 +11,8 @@ import NPCAction from "./NPCActions/NPCAction";
  */
 export default abstract class NPCBehavior extends StateMachineGoapAI<NPCAction>  {
 
+    protected override owner: NPCActor;
+
     public initializeAI(owner: NPCActor, options: Record<string, any>): void {
         this.owner = owner;
     }

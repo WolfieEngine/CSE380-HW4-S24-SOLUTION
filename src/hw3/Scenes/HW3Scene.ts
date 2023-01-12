@@ -231,7 +231,7 @@ export default class HW3Scene extends Scene {
         let red = this.load.getObject("red");
 
         // Initialize the red healers
-        for (let i = 0; i < 1; i++) {
+        for (let i = 0; i < 0; i++) {
             let npc = this.add.animatedSprite(NPCActor, "RedHealer", "primary");
             npc.position.set(red.healers[i][0], red.healers[i][1]);
             npc.addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
@@ -265,7 +265,7 @@ export default class HW3Scene extends Scene {
             npc.navkey = "navmesh";
 
             // Give the NPCs their AI
-            npc.addAI(GuardBehavior, {target: this.battlers[1], range: 25});
+            npc.addAI(GuardBehavior, {target: npc, range: 25});
 
             // Play the NPCs "IDLE" animation 
             npc.animation.play("IDLE");
