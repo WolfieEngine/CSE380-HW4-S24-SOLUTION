@@ -21,6 +21,7 @@ export default class ShootLaserGun extends NPCAction {
     }
 
     public onEnter(options: Record<string, any>): void {
+        console.log("Starting shoot lasergun action");
         // If the actor doesn't have a target -> finish the action
         if (this.actor.hasTarget()) {
             // Otherwise get the targeted entity 

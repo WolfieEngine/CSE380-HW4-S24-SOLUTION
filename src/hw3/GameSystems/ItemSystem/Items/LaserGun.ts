@@ -37,6 +37,7 @@ export default class LaserGun extends Item {
             ],
             onEnd: "Laser faded"
         });
+        this._direction = Vec2.ZERO;
     }
 
     public static create(sprite: Sprite, laser: Line): LaserGun {

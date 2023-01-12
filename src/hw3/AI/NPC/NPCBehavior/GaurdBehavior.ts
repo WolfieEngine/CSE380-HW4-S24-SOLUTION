@@ -23,20 +23,7 @@ import GoapAction from "../../../../Wolfie2D/AI/Goap/GoapAction";
 import GoapState from "../../../../Wolfie2D/AI/Goap/GoapState";
 
 
-
-interface GuardOptions {
-
-    target: TargetableEntity
-
-    range: number;
-
-}
-
-
 export default class GuardBehavior extends NPCBehavior {
-
-    /** The GameNode that owns this NPCGoapAI */
-    protected override owner: NPCActor;
 
     /** The target the guard should guard */
     protected target: TargetableEntity;
@@ -47,7 +34,7 @@ export default class GuardBehavior extends NPCBehavior {
     public initializeAI(owner: NPCActor, options: GuardOptions): void {
         super.initializeAI(owner, options);
 
-        // Initialize the targetable entity the guard should try to protect
+        // Initialize the targetable entity the guard should try to protect and the range to the target
         this.target = options.target
         this.range = options.range;
 
@@ -55,10 +42,10 @@ export default class GuardBehavior extends NPCBehavior {
         this.initializeStatuses();
         // Initialize guard actions
         this.initializeActions();
-
         // Set the guards goal
         this.goal = GuardStatuses.GOAL;
 
+        // Initialize the guard behavior
         this.initialize();
     }
 
@@ -80,11 +67,11 @@ export default class GuardBehavior extends NPCBehavior {
         let scene = this.owner.getScene();
 
         // A status checking if the guard is within range of the target it's supposed to be guarding
-        let atGuardPosition = new TargetExists([this.target], new BasicFinder(null, RangeFilter(this.owner, 0, 625)));
+        let atGuardPosition = new TargetExists([this.target], new BasicFinder(null, RangeFilter(this.owner, 0, this.range*this.range)));
         this.addStatus(GuardStatuses.AT_GUARD_POSITION, atGuardPosition);
 
         // A status checking if there are any enemies at target the guard is guarding
-        let enemyBattlerFinder = new BasicFinder<HW3Battler>(null, BattlerActiveFilter(), BattlerGroupFilter([this.owner.battleGroup], false), RangeFilter(this.target, 0, this.range))
+        let enemyBattlerFinder = new BasicFinder<HW3Battler>(null, BattlerActiveFilter(), BattlerGroupFilter([this.owner.battleGroup], false), RangeFilter(this.target, 0, this.range*this.range))
         let enemyAtGuardPosition = new TargetExists(scene.getBattlers(), enemyBattlerFinder)
         this.addStatus(GuardStatuses.ENEMY_IN_GUARD_POSITION, enemyAtGuardPosition);
 
@@ -114,16 +101,16 @@ export default class GuardBehavior extends NPCBehavior {
         let owner = this.owner;
 
         // An action for targeting an enemy in the guard's guard area
-        let findEnemyInGuardArea = new BasicFinder<HW3Battler>(ClosestPositioned(owner), BattlerGroupFilter([owner.battleGroup], false), RangeFilter(this.target, 0, this.range*this.range));
+        let findEnemyInGuardArea = new BasicFinder<HW3Battler>(ClosestPositioned(owner), BattlerGroupFilter([owner.battleGroup], false), RangeFilter(this.target, 0, this.range*this.range * 10));
         let targetEnemyInGuardArea = new TargetAction(this, this.owner, scene.getBattlers(), findEnemyInGuardArea);
-        targetEnemyInGuardArea.cost = 2;
+        targetEnemyInGuardArea.cost = 1;
         targetEnemyInGuardArea.addPrecondition(GuardStatuses.ENEMY_IN_GUARD_POSITION);
         targetEnemyInGuardArea.addEffect(GuardStatuses.ENEMY_TARGETED);
         this.addState(GuardActions.TARGET_ENEMY, targetEnemyInGuardArea)
 
         // An action for going to an enemy
         let gotoEnemy = new GotoAction(this, this.owner);
-        gotoEnemy.cost = 2;
+        gotoEnemy.cost = 1;
         gotoEnemy.addPrecondition(GuardStatuses.ENEMY_TARGETED);
         gotoEnemy.addEffect(GuardStatuses.AT_ENEMY);
         this.addState(GuardActions.GOTO_ENEMY, gotoEnemy);
@@ -134,7 +121,7 @@ export default class GuardBehavior extends NPCBehavior {
         shootEnemy.addPrecondition(GuardStatuses.AT_ENEMY);
         shootEnemy.addPrecondition(GuardStatuses.ENEMY_TARGETED);
         shootEnemy.addEffect(GuardStatuses.GOAL);
-        shootEnemy.cost = 2;
+        shootEnemy.cost = 1;
         this.addState(GuardActions.SHOOT_ENEMY, shootEnemy);
 
         // An action for targeting a lasergun - target the closest visible lasergun
@@ -145,14 +132,14 @@ export default class GuardBehavior extends NPCBehavior {
         targetLasergun.cost = 5;
         this.addState(GuardActions.TARGET_LASERGUN, targetLasergun)
 
-        // An action for going to a lasergun
+        // // An action for going to a lasergun
         let goToLaserGun = new GotoAction(this, owner);
         goToLaserGun.cost = 5;
         goToLaserGun.addPrecondition(GuardStatuses.LASERGUN_TARGETED);
         goToLaserGun.addEffect(GuardStatuses.AT_LASERGUN);
         this.addState(GuardActions.GOTO_LASER_GUN, goToLaserGun);
 
-        // An action for picking up a lasergun
+        // // An action for picking up a lasergun
         let pickupLaserGun = new PickupItem(this, this.owner);
         pickupLaserGun.addPrecondition(GuardStatuses.LASERGUN_TARGETED);
         pickupLaserGun.addPrecondition(GuardStatuses.AT_LASERGUN);
@@ -160,40 +147,49 @@ export default class GuardBehavior extends NPCBehavior {
         pickupLaserGun.cost = 5;
         this.addState(GuardActions.PICKUP_LASER_GUN, pickupLaserGun);
 
-        // An action for targeting the guards guard position
-        let targetGuardPosition = new TargetAction(this, this.owner, [this.target], new BasicFinder(null));
-        targetGuardPosition.addEffect(GuardStatuses.TARGETED_GUARD_POSITION);
-        targetGuardPosition.cost = 5;
-        this.addState(GuardActions.TARGET_GUARD_POSITION, targetGuardPosition)
+        // // An action for targeting the guards guard position
+        // let targetGuardPosition = new TargetAction(this, this.owner, [this.target], new BasicFinder(null));
+        // targetGuardPosition.addEffect(GuardStatuses.TARGETED_GUARD_POSITION);
+        // targetGuardPosition.cost = 5;
+        // this.addState(GuardActions.TARGET_GUARD_POSITION, targetGuardPosition)
 
-        // An action for going to the guards guard position
-        let gotoGuardPosition = new GotoAction(this, this.owner);
-        gotoGuardPosition.addPrecondition(GuardStatuses.TARGETED_GUARD_POSITION);
-        gotoGuardPosition.addEffect(GuardStatuses.AT_GUARD_POSITION);
-        gotoGuardPosition.cost = 5;
-        this.addState(GuardActions.GOTO_GUARD_POSITION, gotoGuardPosition);
+        // // An action for going to the guards guard position
+        // let gotoGuardPosition = new GotoAction(this, this.owner);
+        // gotoGuardPosition.addPrecondition(GuardStatuses.TARGETED_GUARD_POSITION);
+        // gotoGuardPosition.addEffect(GuardStatuses.AT_GUARD_POSITION);
+        // gotoGuardPosition.cost = 5;
+        // this.addState(GuardActions.GOTO_GUARD_POSITION, gotoGuardPosition);
 
-        // An action for guarding the guard's guard location
-        let guard = new Idle(this, this.owner);
-        guard.addPrecondition(GuardStatuses.AT_GUARD_POSITION);
-        guard.addPrecondition(GuardStatuses.HAS_LASERGUN);
-        guard.addEffect(GuardStatuses.GOAL);
-        guard.cost = 5;
-        this.addState(GuardActions.GUARD, guard);
+        // // An action for guarding the guard's guard location
+        // let guard = new Idle(this, this.owner);
+        // guard.addPrecondition(GuardStatuses.AT_GUARD_POSITION);
+        // guard.addPrecondition(GuardStatuses.HAS_LASERGUN);
+        // guard.addEffect(GuardStatuses.GOAL);
+        // guard.cost = 5;
+        // this.addState(GuardActions.GUARD, guard);
+        let idle = new Idle(this, this.owner)
+        idle.addEffect(GuardStatuses.GOAL);
+        idle.cost = 1000;
+        this.addState(GuardActions.GUARD, idle);
     }
 
-    public addState(stateName: GuardAction, state: GoapAction): void {
+    public override addState(stateName: GuardAction, state: GoapAction): void {
         super.addState(stateName, state);
     }
 
-    public addStatus(statusName: GuardStatus, status: GoapState): void {
+    public override addStatus(statusName: GuardStatus, status: GoapState): void {
         super.addStatus(statusName, status);
     }
 }
 
-type GuardStatus = typeof GuardStatuses[keyof typeof GuardStatuses];
+export interface GuardOptions {
+    target: TargetableEntity
+    range: number;
+}
 
-const GuardStatuses = {
+export type GuardStatus = typeof GuardStatuses[keyof typeof GuardStatuses];
+
+export const GuardStatuses = {
 
     AT_GUARD_POSITION: "at-guard-position",
 
@@ -214,12 +210,11 @@ const GuardStatuses = {
     AT_LASERGUN: "at-laser-gun",
 
     GOAL: "goal"
+} as const;
 
- } as const;
+export type GuardAction = typeof GuardActions[keyof typeof GuardActions];
 
-type GuardAction = typeof GuardActions[keyof typeof GuardActions];
-
-const GuardActions = {
+export const GuardActions = {
 
     GOTO_GUARD_POSITION: "goto-guard-position",
 
