@@ -12,10 +12,9 @@ import Battler from "../GameSystems/BattleSystem/Battler";
 import { TargetableEntity } from "../GameSystems/Targeting/TargetableEntity";
 import { TargetingEntity } from "../GameSystems/Targeting/TargetingEntity";
 import BasicBattler from "../GameSystems/BattleSystem/BasicBattler";
-import HW3Battler from "../GameSystems/BattleSystem/HW3Battler";
 
 
-export default class NPCActor extends AnimatedSprite implements HW3Battler, TargetingEntity {
+export default class NPCActor extends AnimatedSprite implements Battler, TargetingEntity {
 
     /** Override the type of the scene to be the HW3 scene */
     protected scene: HW3Scene
@@ -26,16 +25,13 @@ export default class NPCActor extends AnimatedSprite implements HW3Battler, Targ
     // The NPCs battler object
     protected _battler: Battler;
 
-    // The entity the NPC is currently targeting
-    protected _targetable: TargetableEntity;
     protected _targeting: TargetingEntity
 
     public constructor(sheet: Spritesheet) {
         super(sheet);
         this._navkey = "navkey";
-        this._battler = new BasicBattler();
-        this._targetable = new BasicTargetable(this.position);
-        this._targeting = new BasicTargeting();
+        this._battler = new BasicBattler(new BasicTargetable(this));
+        this._targeting = new BasicTargeting(this);
 
         this.receiver.subscribe("use-hpack");
     }
@@ -49,9 +45,9 @@ export default class NPCActor extends AnimatedSprite implements HW3Battler, Targ
     
     /** The TargetableEntity interface */
 
-    public getTargeting(): TargetingEntity[] { return this._targetable.getTargeting(); }
-    public addTargeting(targeting: TargetingEntity): void { this._targetable.addTargeting(targeting); }
-    public removeTargeting(targeting: TargetingEntity): void { this._targetable.removeTargeting(targeting); }
+    public getTargeting(): TargetingEntity[] { return this._battler.getTargeting(); }
+    public addTargeting(targeting: TargetingEntity): void { this._battler.addTargeting(targeting); }
+    public removeTargeting(targeting: TargetingEntity): void { this._battler.removeTargeting(targeting); }
 
     atTarget(): boolean {
         return this._targeting.getTarget().position.distanceSqTo(this.position) < 625;
@@ -93,6 +89,5 @@ export default class NPCActor extends AnimatedSprite implements HW3Battler, Targ
     /** Protected getters for the different components */
 
     protected get battler(): Battler { return this._battler; }
-    protected get targetable(): TargetableEntity { return this._targetable; }
     protected get targeting(): TargetingEntity { return this._targeting; }
 }

@@ -3,50 +3,45 @@ import NPCActor from "../../../Actors/NPCActor";
 import NPCBehavior from "../NPCBehavior";
 import NPCAction from "./NPCAction";
 import Item from "../../../GameSystems/ItemSystem/Item";
+import Finder from "../../../GameSystems/Searching/Finder";
+import { TargetableEntity } from "../../../GameSystems/Targeting/TargetableEntity";
 
 export default class PickupTargetedItem extends NPCAction {
 
-    // The item we're trying to pickup
-    protected item: Item | null;
+    // The targeting strategy used for this GotoAction - determines how the target is selected basically
+    protected override _targetFinder: Finder<Item>;
+    // The targets or Targetable entities 
+    protected override _targets: Item[];
+    // The target we are going to set the actor to target
+    protected _target: Item | null;
 
     public constructor(parent: NPCBehavior, actor: NPCActor) {
         super(parent, actor);
-        this.item = null;
     }
 
-    public onEnter(options: Record<string, any>): void {
-        console.log("Started pickup item action!");
+    public performAction(target: Item): void {
+        if (target.inventory === null) {
+            this.actor.inventory.add(target)
+        }
+        this.finished();
+    }
 
-        // The item to pickup should be the NPCs current target
-        if (this.actor.hasTarget()) {
-            let target = this.actor.getTarget();
-            // If the NPCs target is an item - set this.item = target
-            if (target !== null && target instanceof Item) {
-                console.log("Picking up an item!!!");
-                this.item = target;
+    public handleInput(event: GameEvent): void {
+        switch(event.type) {
+            default: {
+                super.handleInput(event);
+                break;
             }
         }
     }
 
-    public handleInput(event: GameEvent): void {
+    public get targetFinder(): Finder<Item> { return this._targetFinder; }
+    public set targetFinder(finder: Finder<Item>) { this._targetFinder = finder; }
 
-    }
+    public get targets(): Array<Item> { return this._targets; }
+    public set targets(targets: Array<Item>) { this._targets = targets; }
 
-    public update(deltaT: number): void {
-        // If the item is not null and the item is not already in an inventory, add the item to the actors inventory
-        if (this.item !== null && this.item.inventory === null) {
-            this.actor.inventory.add(this.item);
-        }
-        // Finish the action
-        this.finished();
-    }
-
-    public onExit(): Record<string, any> {
-        // Clear the reference to the item
-        this.item = null;
-        return {};
-    }
-
-
+    public get target(): Item | null { return this._target; }
+    protected set target(target: Item | null) { this._target = target; }
 
 }

@@ -35,7 +35,7 @@ import Viewport from "../../Wolfie2D/SceneGraph/Viewport";
 import RenderingManager from "../../Wolfie2D/Rendering/RenderingManager";
 import SceneManager from "../../Wolfie2D/Scene/SceneManager";
 import NPCBehavior from "../AI/NPC/NPCBehavior";
-import HW3Battler from "../GameSystems/BattleSystem/HW3Battler";
+import Battler from "../GameSystems/BattleSystem/Battler";
 import GuardBehavior from "../AI/NPC/NPCBehavior/GaurdBehavior";
 
 
@@ -48,7 +48,7 @@ export default class HW3Scene extends Scene {
     /** GameNodes in the HW3 Scene */
     private player: PlayerActor;
 
-    private battlers: HW3Battler[];
+    private battlers: Battler[];
 
     private healthpacks: Array<Healthpack>;
     private laserguns: Array<LaserGun>;
@@ -62,7 +62,7 @@ export default class HW3Scene extends Scene {
     public constructor(viewport: Viewport, sceneManager: SceneManager, renderingManager: RenderingManager, options: Record<string, any>) {
         super(viewport, sceneManager, renderingManager, options);
 
-        this.battlers = new Array<HW3Battler>();
+        this.battlers = new Array<Battler>();
         this.laserguns = new Array<LaserGun>();
         this.healthpacks = new Array<Healthpack>();
     }
@@ -231,7 +231,7 @@ export default class HW3Scene extends Scene {
         let red = this.load.getObject("red");
 
         // Initialize the red healers
-        for (let i = 0; i < 0; i++) {
+        for (let i = 0; i < 1; i++) {
             let npc = this.add.animatedSprite(NPCActor, "RedHealer", "primary");
             npc.position.set(red.healers[i][0], red.healers[i][1]);
             npc.addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
@@ -265,7 +265,7 @@ export default class HW3Scene extends Scene {
             npc.navkey = "navmesh";
 
             // Give the NPCs their AI
-            npc.addAI(GuardBehavior, {target: npc, range: 25});
+            npc.addAI(GuardBehavior, {target: this.battlers[1], range: 100});
 
             // Play the NPCs "IDLE" animation 
             npc.animation.play("IDLE");
@@ -391,7 +391,7 @@ export default class HW3Scene extends Scene {
         this.navManager.addNavigableEntity("navmesh", navmesh);
     }
 
-    public getBattlers(): HW3Battler[] {
+    public getBattlers(): Battler[] {
         return this.battlers;
     }
 
