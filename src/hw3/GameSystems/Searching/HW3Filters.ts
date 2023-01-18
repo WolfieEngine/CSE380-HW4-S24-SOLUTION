@@ -16,6 +16,14 @@ export function BattlerGroupFilter(groups: number[], whitelist: boolean = true):
     return whitelist ? (b: Battler) => { return groups.includes(b.battleGroup); } : (b: Battler) => { return !groups.includes(b.battleGroup); }
 }
 
+export function AllyFilter(battler: Battler): (other: Battler) => boolean {
+    return (other: Battler) => { return battler.battleGroup === other.battleGroup; }
+}
+
+export function EnemyFilter(battler: Battler): (other: Battler) => boolean {
+    return (other: Battler) => { return battler.battleGroup !== other.battleGroup; }
+}
+
 export function RangeFilter(positioned: Positioned, minDistSq: number, maxDistSq: number): (t: TargetableEntity) => boolean {
     return (t: TargetableEntity) => { 
         let distSq = t.position.distanceSqTo(positioned.position)

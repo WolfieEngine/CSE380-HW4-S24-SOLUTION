@@ -1,4 +1,4 @@
-import IdleAction from "../NPCActions/IdleAction";
+import IdleAction from "../NPCActions/GotoAction";
 import NPCActor from "../../../Actors/NPCActor";
 import NPCBehavior from "../NPCBehavior";
 import GoalReached from "../NPCStatuses/FalseStatus";

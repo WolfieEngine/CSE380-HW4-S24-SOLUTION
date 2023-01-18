@@ -27,7 +27,7 @@ export default abstract class Item implements Unique, TargetableEntity {
         this.emitter = new Emitter();
 
         this._inventory = null;
-        this._targetable = new BasicTargetable(this.sprite.position);
+        this._targetable = new BasicTargetable(this.sprite);
     }
 
     getTargeting(): TargetingEntity[] { 
