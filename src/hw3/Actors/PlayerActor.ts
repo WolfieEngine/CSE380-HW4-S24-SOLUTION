@@ -1,6 +1,6 @@
 import Spritesheet from "../../Wolfie2D/DataTypes/Spritesheet";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
-import { ItemEvent } from "../Events";
+import { BattlerEvent, ItemEvent } from "../Events";
 import BasicBattler from "../GameSystems/BattleSystem/BasicBattler";
 import Battler from "../GameSystems/BattleSystem/Battler";
 import Inventory from "../GameSystems/ItemSystem/Inventory";
@@ -26,12 +26,16 @@ export default class PlayerActor extends AnimatedSprite implements Battler {
         super(sheet);
         this.battler = new BasicBattler(this);
         this.targetable = new BasicTargetable(this);
+
+        this.receiver.subscribe(ItemEvent.LASERGUN_FIRED)
     }
+
     get battlerActive(): boolean {
         return this.battler.battlerActive;
     }
     set battlerActive(value: boolean) {
         this.battler.battlerActive = value;
+        this.visible = value;
     }
     
     public getTargeting(): TargetingEntity[] { return this.targetable.getTargeting(); }
@@ -58,6 +62,9 @@ export default class PlayerActor extends AnimatedSprite implements Battler {
     }
     set health(value: number) {
         this.battler.health = value;
+        if (this.health <= 0) {
+            this.emitter.fireEvent(BattlerEvent.BATTLER_KILLED, {id: this.id});
+        }
     }
     get speed(): number {
         return this.battler.speed;

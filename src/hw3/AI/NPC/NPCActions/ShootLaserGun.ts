@@ -8,6 +8,7 @@ import { TargetableEntity } from "../../../GameSystems/Targeting/TargetableEntit
 import NPCActor from "../../../Actors/NPCActor";
 import NPCBehavior from "../NPCBehavior";
 import NPCAction from "./NPCAction";
+import { ItemEvent } from "../../../Events";
 
 export default class ShootLaserGun extends NPCAction {
 
@@ -31,9 +32,8 @@ export default class ShootLaserGun extends NPCAction {
             this.lasergun.playShootAnimation();
 
             // Send a laser fired event
-            this.emitter.fireEvent("laser-fired", {
-                aid: this.actor.id,
-                lid: this.lasergun.id, 
+            this.emitter.fireEvent(ItemEvent.LASERGUN_FIRED, {
+                actorId: this.actor.id,
                 to: this.lasergun.laserStart.clone(), 
                 from: this.lasergun.laserEnd.clone()
             });

@@ -38,10 +38,8 @@ export default abstract class PlayerState extends State {
 
         // Handle the player trying to pick up an item
         if (this.parent.controller.pickingUp) {
-            // Get all the items in the scene
-            // let items = Array.from(this.owner.getScene().getItems())
-
-            
+            // Request an item from the scene
+            this.emitter.fireEvent(ItemEvent.ITEM_REQUEST, {node: this.owner, inventory: this.owner.inventory});
         }
 
         // Handle the player trying to drop an item

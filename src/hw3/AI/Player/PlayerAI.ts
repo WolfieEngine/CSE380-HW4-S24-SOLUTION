@@ -1,7 +1,9 @@
 import StateMachineAI from "../../../Wolfie2D/AI/StateMachineAI";
 import AI from "../../../Wolfie2D/DataTypes/Interfaces/AI";
+import Vec2 from "../../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../../Wolfie2D/Events/GameEvent";
 import PlayerActor from "../../Actors/PlayerActor";
+import { ItemEvent } from "../../Events";
 import Inventory from "../../GameSystems/ItemSystem/Inventory";
 import Item from "../../GameSystems/ItemSystem/Item";
 import PlayerController from "./PlayerController";
@@ -42,11 +44,28 @@ export default class PlayerAI extends StateMachineAI implements AI {
         super.update(deltaT);
     }
 
+    public destroy(): void {}
+
     public handleEvent(event: GameEvent): void {
-        super.handleEvent(event);
+        switch(event.type) {
+            case ItemEvent.LASERGUN_FIRED: {
+                this.handleLaserFiredEvent(event.data.get("actorId"), event.data.get("to"), event.data.get("from"));
+                break;
+            }
+            default: {
+                super.handleEvent(event);
+                break;
+            }
+        }
     }
 
-    public destroy(): void {}
+    protected handleLaserFiredEvent(actorId: number, to: Vec2, from: Vec2): void {
+        if (this.owner.id !== actorId && this.owner.collisionShape !== undefined ) {
+            if (this.owner.collisionShape.getBoundingRect().intersectSegment(to, from.clone().sub(to)) !== null) {
+                this.owner.health -= 1;
+            }
+        }
+    }
 
 
 }
