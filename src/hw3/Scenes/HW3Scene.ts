@@ -4,12 +4,11 @@ import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
 import PositionGraph from "../../Wolfie2D/DataTypes/Graphs/PositionGraph";
 import Navmesh from "../../Wolfie2D/Pathfinding/Navmesh";
 import AABB from "../../Wolfie2D/DataTypes/Shapes/AABB";
-import HealthbarManager from "../UI/HealthbarManager";
 
 import HealerBehavior from "../AI/NPC/NPCBehavior/HealerBehavior";
 import IdleBehavior from "../AI/NPC/NPCBehavior/IdleBehavior";
 
-import InventoryHUD from "../UI/InventoryHUD";
+import InventoryHUD from "../GameSystems/HUD/InventoryHUD";
 import PlayerAI from "../AI/Player/PlayerAI";
 
 // import HW3WorldState from "../GameSystems/WorldState";
@@ -17,7 +16,7 @@ import MathUtils from "../../Wolfie2D/Utils/MathUtils";
 
 // import NPCGoapFactory, { NPCGoapType } from "../AI/NPC/NPCGoapFactory";
 
-import { NPCEvent, PlayerEvent } from "../Events";
+import { BattlerEvent, ItemEvent, PlayerEvent } from "../Events";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 import GameOver from "./GameOver";
@@ -37,23 +36,38 @@ import SceneManager from "../../Wolfie2D/Scene/SceneManager";
 import NPCBehavior from "../AI/NPC/NPCBehavior";
 import Battler from "../GameSystems/BattleSystem/Battler";
 import GuardBehavior from "../AI/NPC/NPCBehavior/GaurdBehavior";
+import GameNode from "../../Wolfie2D/Nodes/GameNode";
+import Inventory from "../GameSystems/ItemSystem/Inventory";
+import Item from "../GameSystems/ItemSystem/Item";
+import { ClosestPositioned } from "../GameSystems/Searching/HW3Reducers";
+import BattlerBase from "../GameSystems/BattleSystem/BattlerBase";
+import Color from "../../Wolfie2D/Utils/Color";
+import Timer from "../../Wolfie2D/Timing/Timer";
+import HealthbarHUD from "../GameSystems/HUD/HealthbarHUD";
 
+const BattlerGroups = {
+    RED: 1,
+    BLUE: 2
+} as const;
 
 export default class HW3Scene extends Scene {
 
     /** GameSystems in the HW3 Scene */
-    private healthbarManager: HealthbarManager;
     private inventoryHud: InventoryHUD;
 
-    /** GameNodes in the HW3 Scene */
-    private player: PlayerActor;
-
+    /** All the battlers in the HW3Scene (including the player) */
     private battlers: Battler[];
+    /** Healthbars for the battlers */
+    private healthbars: Map<number, HealthbarHUD>;
+    /** Respawn timers for the battlers */
+    private respawnTimers: Map<number, Timer>;
+
+    private bases: BattlerBase[];
 
     private healthpacks: Array<Healthpack>;
     private laserguns: Array<LaserGun>;
 
-    // The wall layer of the tilemap to use for bullet visualization
+    // The wall layer of the tilemap
     private walls: OrthogonalTilemap;
 
     // The position graph for the navmesh
@@ -63,8 +77,11 @@ export default class HW3Scene extends Scene {
         super(viewport, sceneManager, renderingManager, options);
 
         this.battlers = new Array<Battler>();
+        this.healthbars = new Map<number, HealthbarHUD>();
+
         this.laserguns = new Array<LaserGun>();
         this.healthpacks = new Array<Healthpack>();
+        this.respawnTimers = new Map<number, Timer>();
     }
 
     /**
@@ -113,12 +130,11 @@ export default class HW3Scene extends Scene {
         this.viewport.setZoomLevel(2);
 
         this.initLayers();
-        this.initializeSystems();
+        
         // Create the player
         this.initializePlayer();
         this.initializeItems();
-
-        this.viewport.follow(this.player);
+        this.initializeBases();
 
         this.initializeNavmesh();
 
@@ -128,13 +144,15 @@ export default class HW3Scene extends Scene {
         // Subscribe to relevant events
         this.receiver.subscribe("healthpack");
         this.receiver.subscribe("enemyDied");
+        this.receiver.subscribe(ItemEvent.ITEM_REQUEST);
 
         // Add a UI for health
         this.addUILayer("health");
 
 
         this.receiver.subscribe(PlayerEvent.PLAYER_KILLED);
-        this.receiver.subscribe(NPCEvent.NPC_KILLED);
+        this.receiver.subscribe(BattlerEvent.BATTLER_KILLED);
+        this.receiver.subscribe(BattlerEvent.BATTLER_RESPAWN);
     }
     /**
      * @see Scene.updateScene
@@ -143,8 +161,8 @@ export default class HW3Scene extends Scene {
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }
-        this.healthbarManager.update(deltaT);
         this.inventoryHud.update(deltaT);
+        this.healthbars.forEach(healthbar => healthbar.update(deltaT));
     }
 
     /**
@@ -153,12 +171,16 @@ export default class HW3Scene extends Scene {
      */
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
-            case PlayerEvent.PLAYER_KILLED: {
-                this.handlePlayerKilled(event);
+            case BattlerEvent.BATTLER_KILLED: {
+                this.handleBattlerKilled(event);
                 break;
             }
-            case NPCEvent.NPC_KILLED: {
-                this.handleNPCKilled(event);
+            case BattlerEvent.BATTLER_RESPAWN: {
+                this.handleBattlerRespawn(event.data.get("id"));
+                break;
+            }
+            case ItemEvent.ITEM_REQUEST: {
+                this.handleItemRequest(event.data.get("node"), event.data.get("inventory"));
                 break;
             }
             default: {
@@ -167,21 +189,43 @@ export default class HW3Scene extends Scene {
         }
     }
 
-    /**
-     * Handles a player-killed event
-     * @param event a player-killed event
-     */
-    protected handlePlayerKilled(event: GameEvent): void {
-        this.emitter.fireEvent(GameEventType.CHANGE_SCENE, { scene: GameOver, init: {} });
+    protected handleItemRequest(node: GameNode, inventory: Inventory): void {
+        let items: Item[] = new Array<Item>(...this.healthpacks, ...this.laserguns).filter((item: Item) => {
+            return item.inventory === null && item.position.distanceTo(node.position) <= 100;
+        });
+
+        if (items.length > 0) {
+            inventory.add(items.reduce(ClosestPositioned(node)));
+        }
     }
+
     /**
      * Handles an NPC being killed by unregistering the NPC from the scenes subsystems
      * @param event an NPC-killed event
      */
-    protected handleNPCKilled(event: GameEvent): void {
+    protected handleBattlerKilled(event: GameEvent): void {
         let id: number = event.data.get("id");
-        this.healthbarManager.unregister(id).destroy();
-        this.sceneGraph.getNode(id).destroy();
+        let battler = this.battlers.find(b => b.id === id);
+
+        if (battler) {
+            battler.battlerActive = false;
+            this.healthbars.get(id).visible = false;
+            this.respawnTimers.get(id).start();
+        }
+        
+    }
+
+    protected handleBattlerRespawn(id: number): void {
+        let battler = this.battlers.find(b => b.id === id);
+
+        let base = this.bases.find(base => base.battleGroup === battler.battleGroup);
+        if (base) {
+            battler.position.copy(base.position);
+        }
+
+        battler.health = battler.maxHealth;
+        this.healthbars.get(battler.id).visible = true;
+        battler.battlerActive = true;
     }
 
     /** Initializes the layers in the scene */
@@ -193,34 +237,61 @@ export default class HW3Scene extends Scene {
         this.getLayer("items").setDepth(2);
     }
 
-    /**
-     * Initialize the scenes main subsystems
-     */
-    protected initializeSystems(): void {
-        this.healthbarManager = new HealthbarManager(this, "primary");
-        this.inventoryHud = new InventoryHUD(this, 9, 8, new Vec2(232, 24), "items", "inventorySlot", "slots")
+    protected initializeBases(): void {
+        this.bases = new Array<BattlerBase>();
+
+        let blueGraphic = this.add.graphic(GraphicType.RECT, "primary", {position: new Vec2(120, 50), size: new Vec2(60, 60)})
+        blueGraphic.color = Color.BLUE;
+        blueGraphic.color.a = 0.25;
+        let blueBase = new BattlerBase(blueGraphic);
+        blueBase.battleGroup = BattlerGroups.BLUE;
+        this.bases.push(blueBase);
+
+        let redGraphic = this.add.graphic(GraphicType.RECT, "primary", {position: new Vec2(450, 460), size: new Vec2(60,60)});
+        redGraphic.color = Color.RED;
+        redGraphic.color.a = 0.25;
+        let redBase = new BattlerBase(redGraphic);
+        redBase.battleGroup = BattlerGroups.RED;
+        this.bases.push(redBase);
     }
+
 
     /**
      * Initializes the player in the scene
      */
     protected initializePlayer(): void {
-        this.player = this.add.animatedSprite(PlayerActor, "player1", "primary");
-        this.player.position.set(40, 40);
+        let player = this.add.animatedSprite(PlayerActor, "player1", "primary");
+        player.position.set(40, 40);
+        player.battleGroup = 2;
 
-        this.player.battleGroup = 2;
+        player.health = 10;
+        player.maxHealth = 10;
+
+        player.inventory.onChange = ItemEvent.INVENTORY_CHANGED
+        this.inventoryHud = new InventoryHUD(this, player.inventory, "inventorySlot", {
+            start: new Vec2(232, 24),
+            slotLayer: "slots",
+            padding: 8,
+            itemLayer: "items"
+        });
 
         // Give the player physics
-        this.player.addPhysics(new AABB(Vec2.ZERO, new Vec2(8, 8)));
+        player.addPhysics(new AABB(Vec2.ZERO, new Vec2(8, 8)));
+
         // Give the player a healthbar
-        this.healthbarManager.register(this.player, this.player.size.clone());
+        let healthbar = new HealthbarHUD(this, player, "primary", {size: player.size.clone().scaled(2, 1/2), offset: player.size.clone().scaled(0, -1/2)});
+        this.healthbars.set(player.id, healthbar);
+
         // Give the player PlayerAI
-        this.player.addAI(PlayerAI);
+        player.addAI(PlayerAI);
 
         // Start the player in the "IDLE" animation
-        this.player.animation.play("IDLE");
+        player.animation.play("IDLE");
 
-        this.battlers.push(this.player);
+        this.respawnTimers.set(player.id, this.createRespawnTimer(player));
+        this.battlers.push(player);
+
+        this.viewport.follow(player);
     }
     /**
      * Initialize the NPCs 
@@ -242,7 +313,9 @@ export default class HW3Scene extends Scene {
             npc.maxHealth = 10;
             npc.navkey = "navmesh";
 
-            this.healthbarManager.register(npc, npc.size.clone());
+            // Give the NPC a healthbar
+            let healthbar = new HealthbarHUD(this, npc, "primary", {size: npc.size.clone().scaled(2, 1/2), offset: npc.size.clone().scaled(0, -1/2)});
+            this.healthbars.set(npc.id, healthbar);
 
             npc.addAI(HealerBehavior);
             npc.animation.play("IDLE");
@@ -254,8 +327,9 @@ export default class HW3Scene extends Scene {
             npc.position.set(red.enemies[i][0], red.enemies[i][1]);
             npc.addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
 
-            // Give the NPCS their healthbars
-            this.healthbarManager.register(npc, npc.size.clone());
+            // Give the NPC a healthbar
+            let healthbar = new HealthbarHUD(this, npc, "primary", {size: npc.size.clone().scaled(2, 1/2), offset: npc.size.clone().scaled(0, -1/2)});
+            this.healthbars.set(npc.id, healthbar);
             
             // Set the NPCs stats
             npc.battleGroup = 1
@@ -309,6 +383,13 @@ export default class HW3Scene extends Scene {
 
 
     }
+
+    protected createRespawnTimer(battler: Battler, duration: number = 2000): Timer {
+        return new Timer(duration, () => {
+            this.emitter.fireEvent(BattlerEvent.BATTLER_RESPAWN, {id: battler.id});
+        });
+    }
+
     /**
      * Initialize the items in the scene (healthpacks and laser guns)
      */
@@ -391,21 +472,13 @@ export default class HW3Scene extends Scene {
         this.navManager.addNavigableEntity("navmesh", navmesh);
     }
 
-    public getBattlers(): Battler[] {
-        return this.battlers;
-    }
+    public getBattlers(): Battler[] { return this.battlers; }
 
-    public getWalls(): OrthogonalTilemap {
-        return this.walls;
-    }
+    public getWalls(): OrthogonalTilemap { return this.walls; }
 
-    public getHealthpacks(): Healthpack[] {
-        return this.healthpacks;
-    }
+    public getHealthpacks(): Healthpack[] { return this.healthpacks; }
 
-    public getLaserGuns(): LaserGun[] {
-        return this.laserguns;
-    }
+    public getLaserGuns(): LaserGun[] { return this.laserguns; }
 
     /**
      * Checks if the given target position is visible from the given position.

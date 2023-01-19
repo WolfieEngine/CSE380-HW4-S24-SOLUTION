@@ -2,7 +2,7 @@ import Spritesheet from "../../Wolfie2D/DataTypes/Spritesheet";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite"
 import NavigationPath from "../../Wolfie2D/Pathfinding/NavigationPath";
-import { HudEvent } from "../Events";
+import { BattlerEvent, HudEvent } from "../Events";
 import Inventory from "../GameSystems/ItemSystem/Inventory";
 import HW3Scene from "../Scenes/HW3Scene";
 import BasicTargetable from "../GameSystems/Targeting/BasicTargetable";
@@ -54,7 +54,10 @@ export default class NPCActor extends AnimatedSprite implements Battler, Targeti
     }
 
     public get battlerActive(): boolean { return this.battler.battlerActive; }
-    public set battlerActive(value: boolean) { this.battler.battlerActive = value; }
+    public set battlerActive(value: boolean) { 
+        this.battler.battlerActive = value; 
+        this.visible = value;
+    }
 
     public get battleGroup(): number { return this.battler.battleGroup; }
     public set battleGroup(battleGroup: number) { this.battler.battleGroup = battleGroup; }
@@ -69,6 +72,10 @@ export default class NPCActor extends AnimatedSprite implements Battler, Targeti
     public set health(health: number) { 
         this.battler.health = health; 
         this.emitter.fireEvent(HudEvent.HEALTH_CHANGE, {id: this.id, curhp: this.health, maxhp: this.maxHealth});
+
+        if (this.health <= 0) {
+            this.emitter.fireEvent(BattlerEvent.BATTLER_KILLED, {id: this.id});
+        }
     }
 
     public get speed(): number { return this.battler.speed; }
