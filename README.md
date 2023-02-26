@@ -1,12 +1,12 @@
 # Homework 3 - CSE 380 - Spring 2023
 
-Professor Richard McKenna - richard@cs.stonybrook.edu
-Joe Weaver - hweaver@cs.stonybrook.edu
-Zachary Grandison - zgrandison@cs.stonybrook.edu
-Peter Walsh - peter.t.walsh@stonybrook.edu
-Kevin Cai - kevin.cai@stonybrook.edu
-Andrew Ojeda - atojeda@cs.stonybrook.edu
-Due Date: Friday, March 3, 2023
+- Professor Richard McKenna - richard@cs.stonybrook.edu
+- Joe Weaver - hweaver@cs.stonybrook.edu
+- Zachary Grandison - zgrandison@cs.stonybrook.edu
+- Peter Walsh - peter.t.walsh@stonybrook.edu
+- Kevin Cai - kevin.cai@stonybrook.edu
+
+## Due Date: TBD
 
 ## Introduction
 In this assignment, you will make a simple top-down game using the Typescript programming language and the Wolfie2D game engine. By completing this assignment, you should start to become familiar with the Wolfie2D game engine and develop an understanding of:
