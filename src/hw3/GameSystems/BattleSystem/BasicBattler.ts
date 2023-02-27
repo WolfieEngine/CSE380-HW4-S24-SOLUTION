@@ -1,12 +1,16 @@
+import Positioned from "../../../Wolfie2D/DataTypes/Interfaces/Positioned";
+import Unique from "../../../Wolfie2D/DataTypes/Interfaces/Unique";
 import Vec2 from "../../../Wolfie2D/DataTypes/Vec2";
 import Inventory from "../ItemSystem/Inventory";
+import BasicTargetable from "../Targeting/BasicTargetable";
 import { TargetableEntity } from "../Targeting/TargetableEntity";
 import { TargetingEntity } from "../Targeting/TargetingEntity";
 import Battler from "./Battler";
 
 export default class BasicBattler implements Battler {
 
-    protected owner: TargetableEntity;
+    protected _owner: Unique & Positioned;
+    protected _targetable: TargetableEntity;
     protected _inventory: Inventory;
 
     protected _maxHealth: number;
@@ -15,8 +19,9 @@ export default class BasicBattler implements Battler {
     protected _speed: number;
     protected _active: boolean;
 
-    public constructor(targetable: TargetableEntity) {
-        this.owner = targetable;
+    public constructor(owner: Unique & Positioned) {
+        this._owner = owner;
+        this._targetable = new BasicTargetable(owner);
         this.inventory = new Inventory();
 
         this.maxHealth = 0;
@@ -26,13 +31,13 @@ export default class BasicBattler implements Battler {
         this.battlerActive = true;
     }
     
-    public get id(): number { return this.owner.id; }
+    public get id(): number { return this._owner.id; }
 
-    public get position(): Vec2 { return this.owner.position; }
-    public set position(position: Vec2) { this.owner.position = position; }
+    public get position(): Vec2 { return this._targetable.position; }
+    public set position(position: Vec2) { this._targetable.position = position; }
 
     public get relativePosition(): Vec2 {
-        return this.owner.relativePosition;
+        return this._targetable.relativePosition;
     }
 
     public get battleGroup(): number { return this._battleGroup; }
@@ -53,7 +58,7 @@ export default class BasicBattler implements Battler {
     public get battlerActive(): boolean { return this._active; }
     public set battlerActive(value: boolean) { this._active = value; }
     
-    public getTargeting(): TargetingEntity[] { return this.owner.getTargeting(); }
-    public addTargeting(targeting: TargetingEntity): void { this.owner.addTargeting(targeting); }
-    public removeTargeting(targeting: TargetingEntity): void { this.owner.removeTargeting(targeting); }
+    public getTargeting(): TargetingEntity[] { return this._targetable.getTargeting(); }
+    public addTargeting(targeting: TargetingEntity): void { this._targetable.addTargeting(targeting); }
+    public removeTargeting(targeting: TargetingEntity): void { this._targetable.removeTargeting(targeting); }
 }

@@ -1,4 +1,5 @@
 import Positioned from "../../../Wolfie2D/DataTypes/Interfaces/Positioned";
+import Unique from "../../../Wolfie2D/DataTypes/Interfaces/Unique";
 import Vec2 from "../../../Wolfie2D/DataTypes/Vec2";
 import Inventory from "../ItemSystem/Inventory";
 import { TargetableEntity } from "../Targeting/TargetableEntity";
@@ -6,7 +7,7 @@ import { TargetableEntity } from "../Targeting/TargetableEntity";
 /**
  * An interface for a Battler
  */
-export default interface Battler extends TargetableEntity {
+export default interface Battler extends TargetableEntity, Unique {
 
     /** The Battlers group number */
     get battleGroup(): number;

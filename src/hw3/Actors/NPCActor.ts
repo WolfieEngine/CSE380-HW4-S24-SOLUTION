@@ -30,7 +30,7 @@ export default class NPCActor extends AnimatedSprite implements Battler, Targeti
     public constructor(sheet: Spritesheet) {
         super(sheet);
         this._navkey = "navkey";
-        this._battler = new BasicBattler(new BasicTargetable(this));
+        this._battler = new BasicBattler(this);
         this._targeting = new BasicTargeting(this);
 
         this.receiver.subscribe("use-hpack");

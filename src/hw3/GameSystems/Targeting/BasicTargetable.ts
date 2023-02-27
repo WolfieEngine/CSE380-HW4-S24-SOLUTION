@@ -6,11 +6,11 @@ import { TargetingEntity } from "./TargetingEntity";
 
 
 export default class BasicTargetable implements TargetableEntity {
-    protected owner: Positioned & Unique;
+    protected owner: Positioned;
 
     protected targeting: Map<number, TargetingEntity>;
 
-    constructor(owner: Positioned & Unique) {
+    constructor(owner: Positioned) {
         this.owner = owner;
         this.targeting = new Map<number, TargetingEntity>();
     }
@@ -27,7 +27,6 @@ export default class BasicTargetable implements TargetableEntity {
         this.targeting.delete(targeting.id);
     }
 
-    get id(): number { return this.owner.id; }
     get position(): Vec2 { return this.owner.position; }
     get relativePosition(): Vec2 { return this.owner.relativePosition; }
 
