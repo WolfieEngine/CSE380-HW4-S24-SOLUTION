@@ -44,7 +44,6 @@ import BattlerBase from "../GameSystems/BattleSystem/BattlerBase";
 import Color from "../../Wolfie2D/Utils/Color";
 import Timer from "../../Wolfie2D/Timing/Timer";
 import HealthbarHUD from "../GameSystems/HUD/HealthbarHUD";
-import PatrolBehavior from "../AI/NPC/NPCBehavior/PatrolBehavior";
 import Position from "../GameSystems/Targeting/Position";
 import BasicTargetable from "../GameSystems/Targeting/BasicTargetable";
 import Actor from "../../Wolfie2D/DataTypes/Interfaces/Actor";
