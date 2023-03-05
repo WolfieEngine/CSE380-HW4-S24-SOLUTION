@@ -7,6 +7,7 @@ import AStarDemoScene from "./hw3/Scenes/AstarDemoScene";
 import HW3Scene from "./hw3/Scenes/HW3Scene";
 import GuardDemoScene from "./hw3/Scenes/GuardDemoScene";
 import AstarDemoScene from "./hw3/Scenes/AstarDemoScene";
+import MainHW3Scene from "./hw3/Scenes/MainHW3Scene";
 
 // The main function is your entrypoint into Wolfie2D. Specify your first scene and any options here.
 (function main(){
@@ -37,7 +38,7 @@ import AstarDemoScene from "./hw3/Scenes/AstarDemoScene";
     const game = new Game(options);
 
     // Start our game
-    game.start(AstarDemoScene, {});
+    game.start(MainMenu, {});
 
 })();
 
