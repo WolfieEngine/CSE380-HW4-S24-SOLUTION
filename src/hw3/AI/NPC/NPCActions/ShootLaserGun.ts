@@ -39,7 +39,7 @@ export default class ShootLaserGun extends NPCAction {
             this.emitter.fireEvent(ItemEvent.LASERGUN_FIRED, {
                 actorId: this.actor.id,
                 to: this.lasergun.laserStart.clone(), 
-                from: this.lasergun.laserEnd.clone()
+                from: this.lasergun.laserEnd.clone().sub(this.lasergun.laserStart)
             });
 
             this.timer.start();
