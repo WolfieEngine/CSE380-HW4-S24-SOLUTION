@@ -53,6 +53,14 @@ export default abstract class PlayerState extends State {
         }
     }
 
+    public override handleInput(event: GameEvent): void {
+        switch(event.type) {
+            default: {
+                throw new Error(`Unhandled event of type ${event.type} caught in PlayerState!`);
+            }
+        }
+    }
+
 }
 
 import Idle from "./Idle";
