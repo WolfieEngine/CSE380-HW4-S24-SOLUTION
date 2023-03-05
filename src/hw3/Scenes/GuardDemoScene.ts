@@ -12,13 +12,10 @@ import DirectStrategy from "../../Wolfie2D/Pathfinding/Strategies/DirectStrategy
 import RenderingManager from "../../Wolfie2D/Rendering/RenderingManager";
 import SceneManager from "../../Wolfie2D/Scene/SceneManager";
 import Viewport from "../../Wolfie2D/SceneGraph/Viewport";
-import Timer from "../../Wolfie2D/Timing/Timer";
-import Color from "../../Wolfie2D/Utils/Color";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
 import NPCActor from "../Actors/NPCActor";
 import PlayerActor from "../Actors/PlayerActor";
 import GuardBehavior from "../AI/NPC/NPCBehavior/GaurdBehavior";
-import HealerBehavior from "../AI/NPC/NPCBehavior/HealerBehavior";
 import PlayerAI from "../AI/Player/PlayerAI";
 import { ItemEvent, PlayerEvent, BattlerEvent } from "../Events";
 import Battler from "../GameSystems/BattleSystem/Battler";
@@ -33,7 +30,7 @@ import Position from "../GameSystems/Targeting/Position";
 import AstarStrategy from "../Pathfinding/AstarStrategy";
 import HW3Scene from "./HW3Scene";
 
-export default class MainHW3Scene extends HW3Scene {
+export default class GuardDemoScene extends HW3Scene {
 
     private player: PlayerActor;
     /** All the battlers in the HW3Scene (including the player) */
@@ -124,7 +121,6 @@ export default class MainHW3Scene extends HW3Scene {
         // Add a UI for health
         this.addUILayer("health");
 
-
         this.receiver.subscribe(PlayerEvent.PLAYER_KILLED);
         this.receiver.subscribe(BattlerEvent.BATTLER_KILLED);
         this.receiver.subscribe(BattlerEvent.BATTLER_RESPAWN);
@@ -180,7 +176,6 @@ export default class MainHW3Scene extends HW3Scene {
         this.getLayer("items").setDepth(2);
     }
 
-
     /**
      * Initializes the player in the scene
      */
@@ -188,25 +183,15 @@ export default class MainHW3Scene extends HW3Scene {
         let player = this.add.animatedSprite(PlayerActor, "player1", "primary");
         player.position.set(40, 40);
         player.battleGroup = 2;
-
         player.health = 10;
         player.maxHealth = 10;
-
         player.inventory.onChange = ItemEvent.INVENTORY_CHANGED
-
-        // Give the player physics
         player.addPhysics(new AABB(Vec2.ZERO, new Vec2(8, 8)));
-
-        // Give the player a healthbar
         let healthbar = new HealthbarHUD(this, player, "primary", {size: player.size.clone().scaled(2, 1/2), offset: player.size.clone().scaled(0, -1/2)});
         this.healthbars.set(player.id, healthbar);
 
-        // Give the player PlayerAI
         player.addAI(PlayerAI);
-
-        // Start the player in the "IDLE" animation
         player.animation.play("IDLE");
-
         this.player = player
         this.battlers.push(player);
         this.viewport.follow(player);
@@ -264,13 +249,6 @@ export default class MainHW3Scene extends HW3Scene {
         follower2.animation.play("IDLE");
         this.battlers.push(follower2);
     }
-
-    protected createRespawnTimer(battler: Battler, duration: number = 2000): Timer {
-        return new Timer(duration, () => {
-            this.emitter.fireEvent(BattlerEvent.BATTLER_RESPAWN, {id: battler.id});
-        });
-    }
-
     /**
      * Initialize the items in the scene (healthpacks and laser guns)
      */
@@ -283,20 +261,13 @@ export default class MainHW3Scene extends HW3Scene {
             this.laserguns[i] = LaserGun.create(sprite, line);
             this.laserguns[i].position.set(laserguns.items[i][0], laserguns.items[i][1]);
         }
-
-        let healthpacks = this.load.getObject("healthpacks");
-        this.healthpacks = new Array<Healthpack>(healthpacks.items.length);
-        for (let i = 0; i < healthpacks.items.length; i++) {
-            let sprite = this.add.sprite("healthpack", "primary");
-            this.healthpacks[i] = new Healthpack(sprite);
-            this.healthpacks[i].position.set(healthpacks.items[i][0], healthpacks.items[i][1]);
-        }
     }
     /**
      * Initializes the navmesh graph used by the NPCs in the HW3Scene. This method is a little buggy, and
      * and it skips over some of the positions on the tilemap. If you can fix my navmesh generation algorithm,
      * go for it.
-     * @author PeteyLumpkins
+     * 
+     * - Peter
      */
     protected initializeNavmesh(): void {
         // Create the graph

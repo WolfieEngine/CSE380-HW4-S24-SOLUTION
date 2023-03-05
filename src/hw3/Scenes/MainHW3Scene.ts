@@ -49,8 +49,7 @@ export default class MainHW3Scene extends HW3Scene {
     private battlers: (Battler & Actor)[];
     /** Healthbars for the battlers */
     private healthbars: Map<number, HealthbarHUD>;
-    /** Respawn timers for the battlers */
-    private respawnTimers: Map<number, Timer>;
+
 
     private bases: BattlerBase[];
 
@@ -71,7 +70,6 @@ export default class MainHW3Scene extends HW3Scene {
 
         this.laserguns = new Array<LaserGun>();
         this.healthpacks = new Array<Healthpack>();
-        this.respawnTimers = new Map<number, Timer>();
     }
 
     /**
@@ -166,7 +164,6 @@ export default class MainHW3Scene extends HW3Scene {
                 break;
             }
             case BattlerEvent.BATTLER_RESPAWN: {
-                this.handleBattlerRespawn(event.data.get("id"));
                 break;
             }
             case ItemEvent.ITEM_REQUEST: {
@@ -200,22 +197,8 @@ export default class MainHW3Scene extends HW3Scene {
         if (battler) {
             battler.battlerActive = false;
             this.healthbars.get(id).visible = false;
-            this.respawnTimers.get(id).start();
         }
         
-    }
-
-    protected handleBattlerRespawn(id: number): void {
-        let battler = this.battlers.find(b => b.id === id);
-
-        let base = this.bases.find(base => base.battleGroup === battler.battleGroup);
-        if (base) {
-            battler.position.copy(base.position);
-        }
-
-        battler.health = battler.maxHealth;
-        this.healthbars.get(battler.id).visible = true;
-        battler.battlerActive = true;
     }
 
     /** Initializes the layers in the scene */
@@ -278,9 +261,7 @@ export default class MainHW3Scene extends HW3Scene {
         // Start the player in the "IDLE" animation
         player.animation.play("IDLE");
 
-        this.respawnTimers.set(player.id, this.createRespawnTimer(player));
         this.battlers.push(player);
-
         this.viewport.follow(player);
     }
     /**
@@ -303,8 +284,6 @@ export default class MainHW3Scene extends HW3Scene {
             npc.maxHealth = 10;
             npc.navkey = "navmesh";
 
-            this.respawnTimers.set(npc.id, new Timer(1000));
-
             // Give the NPC a healthbar
             let healthbar = new HealthbarHUD(this, npc, "primary", {size: npc.size.clone().scaled(2, 1/2), offset: npc.size.clone().scaled(0, -1/2)});
             this.healthbars.set(npc.id, healthbar);
@@ -319,7 +298,6 @@ export default class MainHW3Scene extends HW3Scene {
             npc.position.set(red.enemies[i][0], red.enemies[i][1]);
             npc.addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
 
-            this.respawnTimers.set(npc.id, new Timer(1000));
             // Give the NPC a healthbar
             let healthbar = new HealthbarHUD(this, npc, "primary", {size: npc.size.clone().scaled(2, 1/2), offset: npc.size.clone().scaled(0, -1/2)});
             this.healthbars.set(npc.id, healthbar);
@@ -357,7 +335,6 @@ export default class MainHW3Scene extends HW3Scene {
             npc.position.set(blue.enemies[i][0], blue.enemies[i][1]);
             npc.addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
 
-            this.respawnTimers.set(npc.id, new Timer(1000));
             // Give the NPCS their healthbars
             let healthbar = new HealthbarHUD(this, npc, "primary", {size: npc.size.clone().scaled(2, 1/2), offset: npc.size.clone().scaled(0, -1/2)});
             this.healthbars.set(npc.id, healthbar);
@@ -384,7 +361,6 @@ export default class MainHW3Scene extends HW3Scene {
             npc.position.set(blue.healers[i][0], blue.healers[i][1]);
             npc.addPhysics(new AABB(Vec2.ZERO, new Vec2(7, 7)), null, false);
 
-            this.respawnTimers.set(npc.id, new Timer(1000));
             npc.battleGroup = 2;
             npc.speed = 10;
             npc.health = 1;
@@ -400,12 +376,6 @@ export default class MainHW3Scene extends HW3Scene {
         }
 
 
-    }
-
-    protected createRespawnTimer(battler: Battler, duration: number = 2000): Timer {
-        return new Timer(duration, () => {
-            this.emitter.fireEvent(BattlerEvent.BATTLER_RESPAWN, {id: battler.id});
-        });
     }
 
     /**
@@ -433,7 +403,8 @@ export default class MainHW3Scene extends HW3Scene {
      * Initializes the navmesh graph used by the NPCs in the HW3Scene. This method is a little buggy, and
      * and it skips over some of the positions on the tilemap. If you can fix my navmesh generation algorithm,
      * go for it.
-     * @author PeteyLumpkins
+     * 
+     * - Peter
      */
     protected initializeNavmesh(): void {
         // Create the graph

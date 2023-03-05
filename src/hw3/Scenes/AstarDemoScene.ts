@@ -12,6 +12,11 @@ import MathUtils from "../../Wolfie2D/Utils/MathUtils";
 import NPCActor from "../Actors/NPCActor";
 import AstarStrategy from "../Pathfinding/AstarStrategy";
 
+/**
+ * This is a dummy scene to test if your implementation of A* is working or not. If your implementation 
+ * is working correctly, you should see the blue npc make it's way to the small blue box in the top-right 
+ * corner of the screen.
+ */
 export default class AStarDemoScene extends Scene {
 
     protected npc: NPCActor;

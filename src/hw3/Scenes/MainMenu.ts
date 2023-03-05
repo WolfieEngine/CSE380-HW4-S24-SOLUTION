@@ -5,6 +5,9 @@ import Scene from "../../Wolfie2D/Scene/Scene";
 import Color from "../../Wolfie2D/Utils/Color";
 import Label from "../../Wolfie2D/Nodes/UIElements/Label";
 import MainHW3Scene from "./MainHW3Scene";
+import GameEvent from "../../Wolfie2D/Events/GameEvent";
+import AstarDemoScene from "./AstarDemoScene";
+import GuardDemoScene from "./GuardDemoScene";
 
 export default class MainMenu extends Scene {
     // Layers, for multiple main menu screens
@@ -20,7 +23,6 @@ export default class MainMenu extends Scene {
         // The main menu
         this.mainMenu = this.addUILayer("mainMenu");
 
-        // Add play button, and give it an event to emit on press
         const play = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x, center.y - 100), text: "Play"});
         play.size.set(200, 50);
         play.borderWidth = 2;
@@ -28,71 +30,46 @@ export default class MainMenu extends Scene {
         play.backgroundColor = Color.TRANSPARENT;
         play.onClickEventId = "play";
 
-        // Add about button
-        const about = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x, center.y + 100), text: "About"});
-        about.size.set(200, 50);
-        about.borderWidth = 2;
-        about.borderColor = Color.WHITE;
-        about.backgroundColor = Color.TRANSPARENT;
-        about.onClickEventId = "about";
+        const astar = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x, center.y), text: "A* Test Scene"});
+        astar.size.set(200, 50);
+        astar.borderWidth = 2;
+        astar.borderColor = Color.WHITE;
+        astar.backgroundColor = Color.TRANSPARENT;
+        astar.onClickEventId = "astar";
 
-        this.about = this.addUILayer("about");
-        this.about.setHidden(true);
-
-        const aboutHeader = <Label>this.add.uiElement(UIElementType.LABEL, "about", {position: new Vec2(center.x, center.y - 250), text: "About"});
-        aboutHeader.textColor = Color.WHITE;
-
-        const text1 = "This game was created by Peter Walsh and Richard McKenna";
-        const text2 = "using the Wolfie2D game engine, a TypeScript game engine created by";
-        const text3 = "Joe Weaver and Richard McKenna.";
-
-        const line1 = <Label>this.add.uiElement(UIElementType.LABEL, "about", {position: new Vec2(center.x, center.y - 50), text: text1});
-        const line2 = <Label>this.add.uiElement(UIElementType.LABEL, "about", {position: new Vec2(center.x, center.y), text: text2});
-        const line3 = <Label>this.add.uiElement(UIElementType.LABEL, "about", {position: new Vec2(center.x, center.y + 50), text: text3});
-
-        line1.textColor = Color.WHITE;
-        line2.textColor = Color.WHITE;
-        line3.textColor = Color.WHITE;
-
-        const aboutBack = this.add.uiElement(UIElementType.BUTTON, "about", {position: new Vec2(center.x, center.y + 250), text: "Back"});
-        aboutBack.size.set(200, 50);
-        aboutBack.borderWidth = 2;
-        aboutBack.borderColor = Color.WHITE;
-        aboutBack.backgroundColor = Color.TRANSPARENT;
-        aboutBack.onClickEventId = "menu";
+        const guard = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x, center.y + 100), text: "Guard demo"});
+        guard.size.set(200, 50);
+        guard.borderWidth = 2;
+        guard.borderColor = Color.WHITE;
+        guard.backgroundColor = Color.TRANSPARENT;
+        guard.onClickEventId = "guard";
 
         // Subscribe to the button events
         this.receiver.subscribe("play");
-        this.receiver.subscribe("about");
-        this.receiver.subscribe("menu");
-        this.receiver.subscribe("control");
+        this.receiver.subscribe("astar");
+        this.receiver.subscribe("guard");
     }
 
     public updateScene(){
         while(this.receiver.hasNextEvent()){
-            let event = this.receiver.getNextEvent();
+            this.handleEvent(this.receiver.getNextEvent());
+        }
+    }
 
-            console.log(event);
-
-            if(event.type === "play"){
-                this.sceneManager.changeToScene(MainHW3Scene, {});
+    public handleEvent(event: GameEvent): void {
+        switch(event.type) {
+            case "play": {
+                this.sceneManager.changeToScene(MainHW3Scene);
+                break;
             }
-
-            if(event.type === "about"){
-                this.about.setHidden(false);
-                this.mainMenu.setHidden(true);
+            case "astar": {
+                this.sceneManager.changeToScene(AstarDemoScene);
+                break;
             }
-
-            if(event.type === "menu"){
-                this.mainMenu.setHidden(false);
-                this.about.setHidden(true);
-                this.control.setHidden(true);
+            case "guard": {
+                this.sceneManager.changeToScene(GuardDemoScene);
+                break;
             }
-            if(event.type === "control"){
-                this.mainMenu.setHidden(true);
-                this.control.setHidden(false);
-            }
-
         }
     }
 }
