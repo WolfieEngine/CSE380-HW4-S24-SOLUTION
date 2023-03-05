@@ -62,6 +62,7 @@ export default class NPCActor extends AnimatedSprite implements Battler, Targeti
     public set battlerActive(value: boolean) { 
         this.battler.battlerActive = value; 
         this.visible = value;
+        this.aiActive = value;
     }
 
     public get battleGroup(): number { return this.battler.battleGroup; }
@@ -76,7 +77,7 @@ export default class NPCActor extends AnimatedSprite implements Battler, Targeti
     public get health(): number { return this.battler.health; }
     public set health(health: number) { 
         this.battler.health = health; 
-        if (this.health <= 0) {
+        if (this.health <= 0 && this.battlerActive) {
             this.emitter.fireEvent(BattlerEvent.BATTLER_KILLED, {id: this.id});
         }
     }
