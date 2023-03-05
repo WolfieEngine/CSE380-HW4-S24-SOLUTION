@@ -79,14 +79,6 @@ export default abstract class NPCAction extends GoapAction {
 
     public handleInput(event: GameEvent): void {
         switch (event.type) {
-            case "use-hpack": {
-                let id: number = event.data.get('targetId');
-                if (id === this.actor.id) {
-                    let hpack: Healthpack = event.data.get("hpack");
-                    this.actor.health += hpack.health;
-                }
-                break;
-            }
             default: {
                 throw new Error(`Unhandled event caught in NPCAction! Event type: ${event.type}`);
             }

@@ -3,7 +3,7 @@ import NPCBehavior from "../NPCBehavior";
 import Idle from "../NPCActions/GotoAction";
 import ShootLaserGun from "../NPCActions/ShootLaserGun";
 import BasicFinder from "../../../GameSystems/Searching/BasicFinder";
-import { BattlerActiveFilter, BattlerGroupFilter, EnemyFilter, ItemFilter, RangeFilter, VisibleItemFilter } from "../../../GameSystems/Searching/HW3Filters";
+import { BattlerActiveFilter, EnemyFilter, ItemFilter, RangeFilter, VisibleItemFilter } from "../../../GameSystems/Searching/HW3Filters";
 import Item from "../../../GameSystems/ItemSystem/Item";
 import PickupItem from "../NPCActions/PickupItem";
 import { ClosestPositioned } from "../../../GameSystems/Searching/HW3Reducers";
@@ -82,7 +82,7 @@ export default class GuardBehavior extends NPCBehavior {
         // An action for shooting an enemy in the guards guard area
         let shootEnemy = new ShootLaserGun(this, this.owner);
         shootEnemy.targets = scene.getBattlers();
-        shootEnemy.targetFinder = new BasicFinder<Battler>(ClosestPositioned(this.owner), EnemyFilter(this.owner), RangeFilter(this.target, 0, this.range*this.range));
+        shootEnemy.targetFinder = new BasicFinder<Battler>(ClosestPositioned(this.owner), BattlerActiveFilter(), EnemyFilter(this.owner), RangeFilter(this.target, 0, this.range*this.range));
         shootEnemy.addPrecondition(GuardStatuses.HAS_WEAPON);
         shootEnemy.addPrecondition(GuardStatuses.ENEMY_IN_GUARD_POSITION);
         shootEnemy.addEffect(GuardStatuses.GOAL);

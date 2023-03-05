@@ -9,20 +9,24 @@ import NPCActor from "../../../Actors/NPCActor";
 import NPCBehavior from "../NPCBehavior";
 import NPCAction from "./NPCAction";
 import { ItemEvent } from "../../../Events";
+import Timer from "../../../../Wolfie2D/Timing/Timer";
 
 export default class ShootLaserGun extends NPCAction {
 
     protected lasergun: LaserGun | null;
+    protected timer: Timer;
     
     public constructor(parent: NPCBehavior, actor: NPCActor) {
         super(parent, actor);
         this.lasergun = null;
         this._target = null;
+        this.timer = new Timer(2000);
     }
 
     public performAction(target: TargetableEntity): void {
+        this.timer.isStopped() ? console.log("Weapon cooling down!") : console.log("Weapon ready!");
         // If the lasergun is not null and the lasergun is still in the actors inventory; shoot the lasergun
-        if (this.lasergun !== null && this.lasergun.inventory !== null && this.lasergun.inventory.id === this.actor.inventory.id) {
+        if (this.timer.isStopped() && this.lasergun !== null && this.lasergun.inventory !== null && this.lasergun.inventory.id === this.actor.inventory.id) {
             // Set the start, direction, and end position to shoot the laser gun
             this.lasergun.laserStart.copy(this.actor.position);
             this.lasergun.direction.copy(this.actor.position.dirTo(target.position));
@@ -37,6 +41,8 @@ export default class ShootLaserGun extends NPCAction {
                 to: this.lasergun.laserStart.clone(), 
                 from: this.lasergun.laserEnd.clone()
             });
+
+            this.timer.start();
         }
         // Finish the action
         this.finished();
