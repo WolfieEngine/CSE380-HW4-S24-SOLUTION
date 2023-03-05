@@ -12,12 +12,16 @@ import Battler from "../GameSystems/BattleSystem/Battler";
 import { TargetableEntity } from "../GameSystems/Targeting/TargetableEntity";
 import { TargetingEntity } from "../GameSystems/Targeting/TargetingEntity";
 import BasicBattler from "../GameSystems/BattleSystem/BasicBattler";
+import Timer from "../../Wolfie2D/Timing/Timer";
 
 
 export default class NPCActor extends AnimatedSprite implements Battler, TargetingEntity {
 
     /** Override the type of the scene to be the HW3 scene */
     protected scene: HW3Scene
+
+    // An invincible timer for our NPCs
+    protected invincibleTimer: Timer;
 
     // The key of the Navmesh to use to build paths for this NPCActor
     protected _navkey: string;
@@ -32,6 +36,7 @@ export default class NPCActor extends AnimatedSprite implements Battler, Targeti
         this._navkey = "navkey";
         this._battler = new BasicBattler(this);
         this._targeting = new BasicTargeting(this);
+        this.invincibleTimer = new Timer(1000);
 
         this.receiver.subscribe("use-hpack");
     }
@@ -71,8 +76,6 @@ export default class NPCActor extends AnimatedSprite implements Battler, Targeti
     public get health(): number { return this.battler.health; }
     public set health(health: number) { 
         this.battler.health = health; 
-        this.emitter.fireEvent(HudEvent.HEALTH_CHANGE, {id: this.id, curhp: this.health, maxhp: this.maxHealth});
-
         if (this.health <= 0) {
             this.emitter.fireEvent(BattlerEvent.BATTLER_KILLED, {id: this.id});
         }

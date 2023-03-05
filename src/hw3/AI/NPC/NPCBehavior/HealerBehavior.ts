@@ -64,7 +64,7 @@ export default class HealerBehavior extends NPCBehavior  {
     
     /** Initialize the NPC AI */
     public initializeAI(owner: NPCActor, opts: Record<string, any>): void {
-        this.owner = owner;
+        super.initializeAI(owner, opts);
 
         let scene = owner.getScene();
 
