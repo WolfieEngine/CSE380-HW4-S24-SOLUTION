@@ -16,7 +16,6 @@ export default class AStarDemoScene extends Scene {
 
     protected npc: NPCActor;
     protected destination: Vec2;
-
     protected path: NavigationPath;
 
     public loadScene(): void {
@@ -30,29 +29,35 @@ export default class AStarDemoScene extends Scene {
 
         this.viewport.setBounds(0, 0, walls.size.x, walls.size.y);
         this.viewport.setZoomLevel(2);
-
         this.addLayer("primary", 10);
 
+        // Initialize a navmesh covering the tilemap
         let navmesh = this.initializeNavmesh(new PositionGraph(), walls);
         this.navManager.addNavigableEntity("navmesh", navmesh);
+
+        // Register the different pathfinding strategies with the navmesh
         navmesh.registerStrategy("direct", new DirectStrategy(navmesh));
         navmesh.registerStrategy("astar", new AstarStrategy(navmesh));
+        // Set the navigation strategy to be A*
         navmesh.setStrategy("astar");
 
+        // Create a dummy NPC
         this.npc = this.add.animatedSprite(NPCActor, "BlueEnemy", "primary")
         this.npc.addPhysics();
         this.npc.position.copy(new Vec2(25, 450));
         this.destination = new Vec2(450, 25);
 
+        // The little blue rectangle in the top-right is where the NPC is trying to get to
         let destination = this.add.graphic(GraphicType.RECT, "primary", {position: this.destination, size: new Vec2(20, 20)})
         destination.color = Color.BLUE;
         destination.color.a = .50;
 
+        // Construct a path using the navmesh from the npc's position to the target destination
         this.path = navmesh.getNavigationPath(this.npc.position, this.destination);
     }
 
     public updateScene(deltaT: number): void {
-        // Move along the path
+        // Move the npc along the path
         this.npc.moveOnPath(1, this.path);
     }
     
