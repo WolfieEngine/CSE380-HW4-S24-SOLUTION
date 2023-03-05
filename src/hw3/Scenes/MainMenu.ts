@@ -4,7 +4,7 @@ import Layer from "../../Wolfie2D/Scene/Layer";
 import Scene from "../../Wolfie2D/Scene/Scene";
 import Color from "../../Wolfie2D/Utils/Color";
 import Label from "../../Wolfie2D/Nodes/UIElements/Label";
-import hw4_scene from "./HW3Scene";
+import MainHW3Scene from "./MainHW3Scene";
 
 export default class MainMenu extends Scene {
     // Layers, for multiple main menu screens
@@ -75,7 +75,7 @@ export default class MainMenu extends Scene {
             console.log(event);
 
             if(event.type === "play"){
-                this.sceneManager.changeToScene(hw4_scene, {});
+                this.sceneManager.changeToScene(MainHW3Scene, {});
             }
 
             if(event.type === "about"){
