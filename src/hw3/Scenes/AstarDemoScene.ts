@@ -1,16 +1,16 @@
-import PositionGraph from "../../../Wolfie2D/DataTypes/Graphs/PositionGraph";
-import AABB from "../../../Wolfie2D/DataTypes/Shapes/AABB";
-import Vec2 from "../../../Wolfie2D/DataTypes/Vec2";
-import { GraphicType } from "../../../Wolfie2D/Nodes/Graphics/GraphicTypes";
-import OrthogonalTilemap from "../../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
-import NavigationPath from "../../../Wolfie2D/Pathfinding/NavigationPath";
-import Navmesh from "../../../Wolfie2D/Pathfinding/Navmesh";
-import DirectStrategy from "../../../Wolfie2D/Pathfinding/Strategies/DirectStrategy";
-import Scene from "../../../Wolfie2D/Scene/Scene";
-import Color from "../../../Wolfie2D/Utils/Color";
-import MathUtils from "../../../Wolfie2D/Utils/MathUtils";
-import NPCActor from "../../Actors/NPCActor";
-import AstarStrategy from "../../Pathfinding/AstarStrategy";
+import PositionGraph from "../../Wolfie2D/DataTypes/Graphs/PositionGraph";
+import AABB from "../../Wolfie2D/DataTypes/Shapes/AABB";
+import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
+import { GraphicType } from "../../Wolfie2D/Nodes/Graphics/GraphicTypes";
+import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
+import NavigationPath from "../../Wolfie2D/Pathfinding/NavigationPath";
+import Navmesh from "../../Wolfie2D/Pathfinding/Navmesh";
+import DirectStrategy from "../../Wolfie2D/Pathfinding/Strategies/DirectStrategy";
+import Scene from "../../Wolfie2D/Scene/Scene";
+import Color from "../../Wolfie2D/Utils/Color";
+import MathUtils from "../../Wolfie2D/Utils/MathUtils";
+import NPCActor from "../Actors/NPCActor";
+import AstarStrategy from "../Pathfinding/AstarStrategy";
 
 export default class AStarDemoScene extends Scene {
 
@@ -34,13 +34,9 @@ export default class AStarDemoScene extends Scene {
         this.addLayer("primary", 10);
 
         let navmesh = this.initializeNavmesh(new PositionGraph(), walls);
-        // Add this navmesh to the navigation manager
         this.navManager.addNavigableEntity("navmesh", navmesh);
-
-        // Add different strategies to use for this navmesh
         navmesh.registerStrategy("direct", new DirectStrategy(navmesh));
         navmesh.registerStrategy("astar", new AstarStrategy(navmesh));
-        // Select A* as our navigation strategy
         navmesh.setStrategy("astar");
 
         this.npc = this.add.animatedSprite(NPCActor, "BlueEnemy", "primary")
