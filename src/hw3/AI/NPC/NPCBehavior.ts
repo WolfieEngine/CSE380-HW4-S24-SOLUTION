@@ -29,8 +29,6 @@ export default abstract class NPCBehavior extends StateMachineGoapAI<NPCAction> 
     }
 
     /**
-     * If there are any events all NPCs need to handle, regardless of their behavior, you should
-     * catch and handle those events here.
      * @param event the game event
      */
     public handleEvent(event: GameEvent): void {
@@ -48,7 +46,6 @@ export default abstract class NPCBehavior extends StateMachineGoapAI<NPCAction> 
     }
 
     protected handleLasergunFired(actorId: number, to: Vec2, from: Vec2): void {
-        // If the actor took a hit from another lasergun - try taking damage
         if (actorId !== this.owner.id) {
             this.owner.health -= this.owner.collisionShape.getBoundingRect().intersectSegment(to, from) ? 1 : 0;
         }
