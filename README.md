@@ -6,7 +6,7 @@
 - Peter Walsh - peter.t.walsh@stonybrook.edu
 - Kevin Cai - kevin.cai@stonybrook.edu
 
-## Due Date: TBD
+### Due Date: Friday, March 24, 2023
 
 ## Introduction
 In this assignment, you will make a simple top-down game using the Typescript programming language and the Wolfie2D game engine. By completing this assignment, you should start to become familiar with the Wolfie2D game engine and develop an understanding of:
@@ -16,12 +16,15 @@ In this assignment, you will make a simple top-down game using the Typescript pr
 - How to create simple, state-machine AI
 - How to create GOAP actions for GOAP AI in Wolfid2d
 
-
 ## Part 1 - Creating a Tileset
-In this assignment you have to create your own custom tileset. You should have a few unique tiles
+In this assignment you have to create your own custom tileset for a custom tilemap. You can use whatever image editing software you'd like to create the tileset png (I used [Piskel](https://www.piskelapp.com/p/create/sprite)). Creating beautiful tilesets is not the point of this assignment, but you should create at least two custom tiles to distinguish between the wall and floor tiles of your tilemap.
+
+> In case you're worried about scaling, my tiles are 8x8 (pixels). 
 
 ## Part 2 - Creating a Tilemap
-For this assignment, you will create a custom tilemap using the [Tiled]() level editor and the custom tileset you made in part 1. Make sure your tilemap has a layer for the walls with the `Collidable` property.
+For this assignment, you will create a custom tilemap using the [Tiled](https://www.mapeditor.org/) level editor and the custom tileset you made in part 1. The tilemap I created for the assignment is 64x64 tiles where each tile is 8x8 pixels. 
+
+The only constraint on the tilemap is that you should have at least two tile layers called "Floor" and "Wall". The wall layer must have a boolean property called `Collidable` set to `true`. The collidable property tells Wolfie2d's physics system that objects in the game world should collide with this layer of the tilemap.
 
 ## Part 3 - Pathfinding with A*
 Inside of the hw4 codebase, there is a file called `AStarStrategy` where you will have to implement a version of A*. 
@@ -50,8 +53,11 @@ export default class AstarStrategy extends NavPathStrat {
 }
 ```
 
-For this assigment, I have adpated Wolfie2d's navigation system to support different strategies for pathfinding, allowing you to swap out *how* pathfinding is performed. Inside the main scene class for the game, you'll have to set the navmesh to use A* pathfinding instead of the direct pathfinding strategy I've given you.
+For this assigment, I have adpated Wolfie2d's navigation system to support different strategies for pathfinding, allowing you to swap out how pathfinding is performed. Inside the main scene class for the game, you'll have to set the navmesh to use A* pathfinding instead of the direct pathfinding strategy I've given you.
 
 If you're looking to run a basic test to see whether or not your algorithm is working on a single bot, I have configured a scene to try and help you test whether your algorithm is working (approximately). You should be able to switch to the A* demo scene from the main menu.
 
 > As a final note; I have intentionally left out many details regarding the implementation of the algorithm. Things like what your heuristic should be, which data structures you use, and any helper methods you want to define are up to you :slightly_smiling_face: 
+
+## Part 4 - Goal-Oriented-Action-Planning and Healers
+
