@@ -1,4 +1,4 @@
-# Homework 3 - CSE 380 - Spring 2023
+# Homework 4 - CSE 380 - Spring 2023
 
 - Professor Richard McKenna - richard@cs.stonybrook.edu
 - Joe Weaver - hweaver@cs.stonybrook.edu
@@ -52,6 +52,6 @@ export default class AstarStrategy extends NavPathStrat {
 
 For this assigment, I have adpated Wolfie2d's navigation system to support different strategies for pathfinding, allowing you to swap out *how* pathfinding is performed. Inside the main scene class for the game, you'll have to set the navmesh to use A* pathfinding instead of the direct pathfinding strategy I've given you.
 
-If you're looking to run a basic test to see whether or not your algorithm is working on a single bot, I have configured a scene to specifically test your implementation of A*. All you have to do is set the game's initial scene to be the A* test scene in the main method.
+If you're looking to run a basic test to see whether or not your algorithm is working on a single bot, I have configured a scene to try and help you test whether your algorithm is working (approximately). You should be able to switch to the A* demo scene from the main menu.
 
 > As a final note; I have intentionally left out many details regarding the implementation of the algorithm. Things like what your heuristic should be, which data structures you use, and any helper methods you want to define are up to you :slightly_smiling_face: 
