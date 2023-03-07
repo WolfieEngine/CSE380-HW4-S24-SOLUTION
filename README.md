@@ -32,19 +32,18 @@ For this assignment, you will create a custom tilemap using the [Tiled](https://
 The only constraint on the tilemap is that you should have at least two tile layers called "Floor" and "Wall". The wall layer must have a boolean property called `Collidable` set to `true`. The collidable property tells Wolfie2d's physics system that objects in the game world should collide with this layer of the tilemap.
 
 ## Part 3 - Pathfinding with A*
-Inside of the hw4 codebase, there is a file called `AStarStrategy` where you will have to implement a version of A*. 
+In this homework assignment, you will have to use A* to construct paths for your AI. The paths you construct for your AI should be returned from the `buildPath(to: Vec2, from: Vec2)` method of the `AstarStrategy` class (shown below).
 
-```typescript 
+```typescript
+// TODO Construct a NavigationPath object using A*
+
 /**
- * This is where the students will be implementing their version of A* - in theory.
- * 
  * The AstarStrategy class is an extension of the abstract NavPathStrategy class. For our navigation system, you can
  * now specify and define your own pathfinding strategy. Originally, the two options were to use Djikstras or a
  * direct (point A -> point B) strategy. The only way to change how the pathfinding was done was by hard-coding things
  * into the classes associated with the navigation system. 
  * 
- * This is the Strategy design pattern ;)
- * @author PeteyLumpkins
+ * - Peter
  */
 export default class AstarStrategy extends NavPathStrat {
 
@@ -52,13 +51,43 @@ export default class AstarStrategy extends NavPathStrat {
      * @see NavPathStrat.buildPath()
      */
     public buildPath(to: Vec2, from: Vec2): NavigationPath {
-        return null;
+        return new NavigationPath(new Stack());
     }
     
 }
 ```
+In Wolfie2d, the current pathfinding system uses a `NavigationPath` object that wraps around a stack of positions. Every time the actor/AI gets close to the position at the top of the navigation path stack, the position gets popped from the stack and the AI will then start moving toward the next position.
 
+### Configuring A* Pathfinding
 For this assigment, I have adpated Wolfie2d's navigation system to support different strategies for pathfinding, allowing you to swap out how pathfinding is performed. Inside the main scene class for the game, you'll have to set the navmesh to use A* pathfinding instead of the direct pathfinding strategy I've given you.
+
+You can swap the strategy you use for pathfinding out in the `initializeNavmesh()` method.
+
+```typescript
+export default class MainHW3Scene extends HW3Scene {
+
+    protected initializeNavmesh(): void {
+        // Create the graph
+        this.graph = new PositionGraph();
+        
+        // Implementation details not shown...
+
+        // Set this graph as a navigable entity
+        let navmesh = new Navmesh(this.graph);
+        
+        // Add different strategies to use for this navmesh
+        navmesh.registerStrategy("direct", new DirectStrategy(navmesh));
+        navmesh.registerStrategy("astar", new AstarStrategy(navmesh));
+
+        // TODO set the strategy to use A* pathfinding
+        navmesh.setStrategy("direct");
+
+        // Add this navmesh to the navigation manager
+        this.navManager.addNavigableEntity("navmesh", navmesh);
+    }
+    
+}
+```
 
 If you're looking to run a basic test to see whether or not your algorithm is working on a single bot, I have configured a scene to try and help you test whether your algorithm is working (approximately). You should be able to switch to the A* demo scene from the main menu.
 
