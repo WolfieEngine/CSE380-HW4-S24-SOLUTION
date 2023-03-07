@@ -12,9 +12,9 @@
 In this assignment, you will make a simple top-down game using the Typescript programming language and the Wolfie2D game engine. By completing this assignment, you should start to become familiar with the Wolfie2D game engine and develop an understanding of:
 
 - How to create custom Tilemaps and Tilesets using the Tiled level editor
-- Use Wolfie2d's pathfinding system
-- How to create simple, state-machine AI
-- How to create GOAP actions for GOAP AI in Wolfid2d
+- Use Wolfie2d's pathfinding/navigation system
+- How to construct a path using a heuristic algorithm (A*)
+- How to create GOAP actions and behavior in Wolfid2d
 
 ## How To Play
 There is not much of a "game" to be played in this assignment. When you hit the "play" button, you will assume control of the player in the top-left corner of the map. You can move the player around with WASD, but that's about it. 
@@ -96,9 +96,46 @@ If you're looking to run a basic test to see whether or not your algorithm is wo
 ## Part 4 - GOAP (Goal-Oriented-Action-Planning)
 GOAP is a tricky thing to implement in a way that's clean. You're going to see my best shot at it in this assignment.
 
-## Part 4.1 - NPCActions
+## Part 4.1 - Moving on a path
+When you start the HW4 main scene up (with play) you should notice that none of the bots I have loaded in are moving. Moving the NPCs should be done inside the update method of the base `NPCAction` class.
 
-## Part 4.2 - UseHealthPack
+```typescript
+export default abstract class NPCAction extends GoapAction {
+
+    protected parent: NPCBehavior;
+    protected actor: NPCActor;
+
+    public update(deltaT: number): void {
+        // TODO get the NPCs to move on their paths
+    }
+    
+}
+```
+
+The NPCs should move on the path toward their target until they have reached the target. Once the NPC has reached their target, they should attempt to perform their action by calling the `performAction()` method with whatever the current target (`this.target`) of the action is.
+
+You can move an Actor along a `NavigationPath` object using the `moveOnPath()` method.
+```
+interface Actor {
+    /**
+     * Moves this GameNode along a path
+     * @param speed The speed to move with
+     * @param path The path we're moving along
+     */
+    moveOnPath(speed: number, path: NavigationPath): void;
+}
+```
+If you get this part to work, you should notice the bots start to move around the HW4 level.
+
+## Part 4.2 - Using a healthpack
+Inside the HW4 codebase, there is a file called `UseHeathpack.ts` where you need to implement the `UseHealthpack` action for the NPCs. The purpose of the action is to use a healthpack in the actors inventory to heal the selected target.
+
+Regardless of how you implement the action, whenever a healthpack get's used, two things should happen:
+
+1. The targets health should be incremented by the amount of health the healthpack has.
+2. The healthpack should be removed from the actor's inventory
+
+The intention is for you to use this action to configure the GOAP behavior for the healer in the next part. 
 
 ## Part 4.3 - Configuring the Healer
 For this part of the assignment, you need to configure the healer's behavior in the `HealerBehavior` class. The healer behavior should be configured with four world states.
