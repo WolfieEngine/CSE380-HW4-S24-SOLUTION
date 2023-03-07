@@ -93,7 +93,62 @@ If you're looking to run a basic test to see whether or not your algorithm is wo
 
 > As a final note; I have intentionally left out many details regarding the implementation of the algorithm. Things like what your heuristic should be, which data structures you use, and any helper methods you want to define are up to you.
 
-## Part 4 - Goal-Oriented-Action-Planning and Healers
+## Part 4 - GOAP (Goal-Oriented-Action-Planning)
+GOAP is a tricky thing to implement in a way that's clean. You're going to see my best shot at it in this assignment.
 
-For this part of the assignment, you'll need to implement some functionality to get the `HealerBehavior` to work. The
+## Part 4.1 - NPCActions
+
+## Part 4.2 - UseHealthPack
+
+## Part 4.3 - Configuring the Healer
+For this part of the assignment, you need to configure the healer's behavior in the `HealerBehavior` class. The healer behavior should be configured with four world states.
+
+```typescript
+// World states for the healer
+const HealerStatuses = {
+
+    // Whether or not a healthpack exists in the world
+    HPACK_EXISTS: "hpack-exists",
+
+    // Whether the healer has a healthpack in their inventory or not
+    ALLY_EXISTS: "ally-exists",
+
+    // Whether the healer has any allies in the game world or not
+    HAS_HPACK: "has-hpack",
+
+    // Whether the healer has reached it's goal or not
+    GOAL: "goal"
+
+} as const
+```
+
+Additionally, the healer's behavior should be configured with three actions that (in general) do the following:
+
+1. Pick up the closest, visible healthpack from the pool of healthpacks in the scene
+    
+    | Preconditions               | Effects |
+    | ----------------------------| ------- |
+    | HealerStatuses.HPACK_EXISTS | HealerStatuses.HAS_HPACK |
+    
+2. Use a healthpack on the closest, active ally battler who's health is less than half their maximum health. The battler's should be selected from the pool of battlers in the scene.
+
+    | Preconditions               | Effects |
+    | ----------------------------| ------------------- |
+    | HealerStatuses.ALLY_EXISTS  | HealerStatuses.GOAL |
+    | HealerStatuses.HAS_HPACK    |                     |
+    
+3. Idle (do nothing)
+
+    | Preconditions | Effects             |
+    | ------------- | ------------------- |
+    |               | HealerStatuses.GOAL |
+
+The costs for each of the actions is up to you. For reference, here are some general rules to follow as you're configuring the healer's actions:
+
+- If one of the healer's allies needs health and the healer has a healthpack, the healer should immediatly seek out and heal their ally.
+- If one of the healer's allies needs health and the healer does not have a healthpack, the healer should seek out and attempt to pick up the closest healthpack they can find, then bring it over to their ally and heal them.
+- The healer should only idle if there are no allies to heal or no healthpacks for the healer to pickup and/or bring to their allies.
+
+
+
 
