@@ -109,7 +109,7 @@ The directory structure of the homework codebase looks similar to the tree diagr
 > Something worth pointing out about this game is that it's only running at around 30 frames per second. Rendering the complete tilemap I have made with all 20 enemies running around on screen doing pathfinding and GOAP is expensive.
 
 ## Part 1 - Creating a Tileset
-In this assignment you have to create your own custom tileset for a custom tilemap. You can use whatever image editing software you'd like to create the tileset png (I used [Piskel](https://www.piskelapp.com/p/create/sprite)). Creating beautiful tilesets is not the point of this assignment, but you should create at least two custom tiles to distinguish between the wall and floor tiles of your tilemap.
+In this assignment, you have to create your custom tileset for a custom tilemap. You can use whatever image editing software you'd like to create the tileset png (I used [Piskel](https://www.piskelapp.com/p/create/sprite)). Creating beautiful tilesets is not the point of this assignment, but you should create at least two custom tiles to distinguish between the wall and floor tiles of your tilemap.
 
 > In case you're worried about scaling, my tiles are 8x8 (pixels). 
 
@@ -117,6 +117,8 @@ In this assignment you have to create your own custom tileset for a custom tilem
 For this assignment, you will create a custom tilemap using the [Tiled](https://www.mapeditor.org/) level editor and the custom tileset you made in part 1. The tilemap I created for the assignment is 64x64 tiles where each tile is 8x8 pixels. 
 
 The only constraint on the tilemap is that you should have at least two tile layers called "Floor" and "Wall". The wall layer must have a boolean property called `Collidable` set to `true`. The collidable property tells Wolfie2d's physics system that objects in the game world should collide with this layer of the tilemap.
+
+> When you create your tilemaps, you'll also most likely have to update the positions of the enemies and the items around the map. 
 
 ## Part 3 - Pathfinding with A*
 In this homework assignment, you will have to use A* to construct paths for your AI. The paths you construct for your AI should be returned from the `buildPath(to: Vec2, from: Vec2)` method of the `AstarStrategy` class (shown below).
@@ -146,7 +148,7 @@ export default class AstarStrategy extends NavPathStrat {
 In Wolfie2d, the current pathfinding system uses a `NavigationPath` object that wraps around a stack of positions. Every time the actor/AI gets close to the position at the top of the navigation path stack, the position gets popped from the stack and the AI will then start moving toward the next position.
 
 ### Configuring A* Pathfinding
-For this assigment, I have adpated Wolfie2d's navigation system to support different strategies for pathfinding, allowing you to swap out how pathfinding is performed. Inside the main scene class for the game, you'll have to set the navmesh to use A* pathfinding instead of the direct pathfinding strategy I've given you.
+For this assignment, I have adapted Wolfie2d's navigation system to support different strategies for pathfinding, allowing you to swap out how pathfinding is performed. Inside the main scene class for the game, you'll have to set the navmesh to use A* pathfinding instead of the direct pathfinding strategy I've given you.
 
 You can swap the strategy you use for pathfinding out in the `initializeNavmesh()` method.
 
@@ -181,7 +183,6 @@ If you're looking to run a basic test to see whether or not your algorithm is wo
 > As a final note; I have intentionally left out many details regarding the implementation of the algorithm. Things like what your heuristic should be, which data structures you use, and any helper methods you want to define are up to you.
 
 ## Part 4 - GOAP (Goal-Oriented-Action-Planning)
-GOAP is a tricky thing to implement in a way that's clean. You're going to see my best shot at it in this assignment.
 
 ## Part 4.1 - Moving on a path
 When you start the HW4 main scene up (with play) you should notice that none of the bots I have loaded in are moving. Moving the NPCs should be done inside the update method of the base `NPCAction` class.
@@ -202,7 +203,7 @@ export default abstract class NPCAction extends GoapAction {
 The NPCs should move on the path toward their target until they have reached the target. Once the NPC has reached their target, they should attempt to perform their action by calling the `performAction()` method with whatever the current target (`this.target`) of the action is.
 
 You can move an Actor along a `NavigationPath` object using the `moveOnPath()` method.
-```
+```typescript
 interface Actor {
     /**
      * Moves this GameNode along a path
@@ -215,7 +216,7 @@ interface Actor {
 If you get this part to work, you should notice the bots start to move around the HW4 level.
 
 ## Part 4.2 - Using a healthpack
-Inside the HW4 codebase, there is a file called `UseHeathpack.ts` where you need to implement the `UseHealthpack` action for the NPCs. The purpose of the action is to use a healthpack in the actors inventory to heal the selected target.
+Inside the HW4 codebase, there is a file called `UseHeathpack.ts` where you need to implement the `UseHealthpack` action for the NPCs. The purpose of the action is to use a healthpack in the actor's inventory to heal the selected target.
 
 Regardless of how you implement the action, whenever a healthpack get's used, two things should happen:
 
@@ -225,7 +226,7 @@ Regardless of how you implement the action, whenever a healthpack get's used, tw
 The intention is for you to use this action to configure the GOAP behavior for the healer in the next part. 
 
 ## Part 4.3 - Configuring the Healer
-For this part of the assignment, you need to configure the healer's behavior in the `HealerBehavior` class. The healer behavior should be configured with four world states.
+For this part of the assignment, you need to configure the healer's behavior in the `HealerBehavior` class. The healer's behavior should be configured with four world states.
 
 ```typescript
 // World states for the healer
@@ -254,7 +255,7 @@ Additionally, the healer's behavior should be configured with three actions that
     | ----------------------------| ------- |
     | HealerStatuses.HPACK_EXISTS | HealerStatuses.HAS_HPACK |
     
-2. Use a healthpack on the closest, active ally battler who's health is less than half their maximum health. The battler's should be selected from the pool of battlers in the scene.
+2. Use a healthpack on the closest, active ally battler whose health is less than half their maximum health. The battler's should be selected from the pool of battlers in the scene.
 
     | Preconditions               | Effects |
     | ----------------------------| ------------------- |
@@ -267,11 +268,11 @@ Additionally, the healer's behavior should be configured with three actions that
     | ------------- | ------------------- |
     |               | HealerStatuses.GOAL |
 
-The costs for each of the actions is up to you. For reference, here are some general rules to follow as you're configuring the healer's actions:
+The costs for each of the actions are up to you. For reference, here are some general rules to follow as you're configuring the healer's actions:
 
-- If one of the healer's allies needs health and the healer has a healthpack, the healer should immediatly seek out and heal their ally.
+- If one of the healer's allies needs health and the healer has a healthpack, the healer should immediately seek out and heal their ally.
 - If one of the healer's allies needs health and the healer does not have a healthpack, the healer should seek out and attempt to pick up the closest healthpack they can find, then bring it over to their ally and heal them.
-- The healer should only idle if there are no allies to heal or no healthpacks for the healer to pickup and/or bring to their allies.
+- The healer should only idle if there are no allies to heal or no healthpacks for the healer to pick up and/or bring to their allies.
 
 
 
