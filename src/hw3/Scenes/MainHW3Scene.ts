@@ -122,7 +122,6 @@ export default class MainHW3Scene extends HW3Scene {
         // Create the player
         this.initializePlayer();
         this.initializeItems();
-        this.initializeBases();
 
         this.initializeNavmesh();
 
@@ -210,23 +209,7 @@ export default class MainHW3Scene extends HW3Scene {
         this.getLayer("items").setDepth(2);
     }
 
-    protected initializeBases(): void {
-        this.bases = new Array<BattlerBase>();
 
-        let blueGraphic = this.add.graphic(GraphicType.RECT, "primary", {position: new Vec2(120, 50), size: new Vec2(60, 60)})
-        blueGraphic.color = Color.BLUE;
-        blueGraphic.color.a = 0.25;
-        let blueBase = new BattlerBase(blueGraphic);
-        blueBase.battleGroup = BattlerGroups.BLUE;
-        this.bases.push(blueBase);
-
-        let redGraphic = this.add.graphic(GraphicType.RECT, "primary", {position: new Vec2(450, 460), size: new Vec2(60,60)});
-        redGraphic.color = Color.RED;
-        redGraphic.color.a = 0.25;
-        let redBase = new BattlerBase(redGraphic);
-        redBase.battleGroup = BattlerGroups.RED;
-        this.bases.push(redBase);
-    }
 
 
     /**
@@ -309,22 +292,13 @@ export default class MainHW3Scene extends HW3Scene {
             npc.maxHealth = 10;
             npc.navkey = "navmesh";
 
-            npc.addAI(GuardBehavior, {target: this.battlers[1], range: 100});
+            npc.addAI(GuardBehavior, {target: new BasicTargetable(new Position(npc.position.x, npc.position.y)), range: 100});
 
             // Play the NPCs "IDLE" animation 
             npc.animation.play("IDLE");
             // Add the NPC to the battlers array
             this.battlers.push(npc);
         }
-
-        (<NPCActor>this.battlers[6]).addAI(GuardBehavior, {target: this.battlers[1], range: 100});
-
-        let redBase = this.bases.find(b => b.battleGroup === BattlerGroups.RED);
-        let bttmLeft = redBase.region.boundary.bottomLeft
-        let topLeft = redBase.region.boundary.topLeft;
-
-        (<NPCActor>this.battlers[7]).addAI(GuardBehavior, {target: new BasicTargetable(new Position(bttmLeft.x, bttmLeft.y)), range: 100});
-        (<NPCActor>this.battlers[8]).addAI(GuardBehavior, {target: new BasicTargetable(new Position(topLeft.x, topLeft.y)), range: 100});
 
         // Get the object data for the blue enemies
         let blue = this.load.getObject("blue");
