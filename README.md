@@ -19,6 +19,93 @@ In this assignment, you will make a simple top-down game using the Typescript pr
 ## How To Play
 There is not much of a "game" to be played in this assignment. When you hit the "play" button, you will assume control of the player in the top-left corner of the map. You can move the player around with WASD, but that's about it. 
 
+## Codebase Files
+The directory structure of the homework codebase looks similar to the tree diagram shown below.
+```
+.
+├── README.md
+├── dist
+│   ├── builtin
+│   ├── bundle.js
+│   ├── demo_assets
+│   ├── hw4_assets
+│   └── index.html
+├── gulpfile.js
+├── package-lock.json
+├── package.json
+├── src
+│   ├── hw3
+│   │   ├── AI
+│   │   │   ├── NPC
+│   │   │   │   ├── NPCActions
+│   │   │   │   │   ├── GotoAction.ts
+│   │   │   │   │   ├── NPCAction.ts
+│   │   │   │   │   ├── PickupItem.ts
+│   │   │   │   │   ├── ShootLaserGun.ts
+│   │   │   │   │   └── UseHealthpack.ts
+│   │   │   │   ├── NPCBehavior
+│   │   │   │   │   ├── GaurdBehavior.ts
+│   │   │   │   │   ├── HealerBehavior.ts
+│   │   │   │   │   └── IdleBehavior.ts
+│   │   │   │   ├── NPCBehavior.ts
+│   │   │   │   └── NPCStatuses
+│   │   │   │       ├── FalseStatus.ts
+│   │   │   │       ├── HasHealth.ts
+│   │   │   │       ├── HasItem.ts
+│   │   │   │       └── TargetExists.ts
+│   │   │   └── Player
+│   │   │       ├── PlayerAI.ts
+│   │   │       ├── PlayerController.ts
+│   │   │       └── PlayerStates
+│   │   │           ├── Dead.ts
+│   │   │           ├── Idle.ts
+│   │   │           ├── Invincible.ts
+│   │   │           ├── Moving.ts
+│   │   │           └── PlayerState.ts
+│   │   ├── Actors
+│   │   │   ├── NPCActor.ts
+│   │   │   └── PlayerActor.ts
+│   │   ├── Events.ts
+│   │   ├── GameSystems
+│   │   │   ├── BattleSystem
+│   │   │   │   ├── BasicBattler.ts
+│   │   │   │   ├── Battler.ts
+│   │   │   │   └── BattlerBase.ts
+│   │   │   ├── HUD
+│   │   │   │   ├── HealthbarHUD.ts
+│   │   │   │   └── InventoryHUD.ts
+│   │   │   ├── ItemSystem
+│   │   │   │   ├── Inventory.ts
+│   │   │   │   ├── Item.ts
+│   │   │   │   └── Items
+│   │   │   │       ├── Healthpack.ts
+│   │   │   │       └── LaserGun.ts
+│   │   │   ├── Searching
+│   │   │   │   ├── BasicFinder.ts
+│   │   │   │   ├── Finder.ts
+│   │   │   │   ├── HW3Filters.ts
+│   │   │   │   └── HW3Reducers.ts
+│   │   │   └── Targeting
+│   │   │       ├── BasicTargetable.ts
+│   │   │       ├── BasicTargeting.ts
+│   │   │       ├── Position.ts
+│   │   │       ├── TargetableEntity.ts
+│   │   │       └── TargetingEntity.ts
+│   │   ├── Pathfinding
+│   │   │   └── AstarStrategy.ts
+│   │   └── Scenes
+│   │       ├── AstarDemoScene.ts
+│   │       ├── GameOver.ts
+│   │       ├── GuardDemoScene.ts
+│   │       ├── HW3Scene.ts
+│   │       ├── MainHW3Scene.ts
+│   │       └── MainMenu.ts
+│   ├── index.d.ts
+│   ├── index.html
+│   └── main.ts
+└── tsconfig.json
+```
+
 > Something worth pointing out about this game is that it's only running at around 30 frames per second. Rendering the complete tilemap I have made with all 20 enemies running around on screen doing pathfinding and GOAP is expensive.
 
 ## Part 1 - Creating a Tileset
