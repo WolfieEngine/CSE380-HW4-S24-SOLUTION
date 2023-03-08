@@ -16,6 +16,8 @@ In this assignment, you will make a simple top-down game using the Typescript pr
 - How to construct a path using a heuristic algorithm (A*)
 - How to create GOAP actions and behavior in Wolfid2d
 
+> In lots of places in the code, it will say `hw3` instead of `hw4`. At the start of the semester, we swapped the original order of the third and fourth homework assignments. I hope it's not too confusing.
+
 ## How To Play
 There is not much of a "game" to be played in this assignment. When you hit the "play" button, you will assume control of the player in the top-left corner of the map. You can move the player around with WASD, but that's about it. 
 
