@@ -29,7 +29,7 @@ import Inventory from "../GameSystems/ItemSystem/Inventory";
 import Item from "../GameSystems/ItemSystem/Item";
 import Healthpack from "../GameSystems/ItemSystem/Items/Healthpack";
 import LaserGun from "../GameSystems/ItemSystem/Items/LaserGun";
-import { ClosestPositioned } from "../GameSystems/Searching/HW3Reducers";
+import { ClosestPositioned } from "../GameSystems/Searching/HW4Reducers";
 import BasicTargetable from "../GameSystems/Targeting/BasicTargetable";
 import Position from "../GameSystems/Targeting/Position";
 import AstarStrategy from "../Pathfinding/AstarStrategy";
@@ -40,7 +40,7 @@ const BattlerGroups = {
     BLUE: 2
 } as const;
 
-export default class MainHW3Scene extends HW4Scene {
+export default class MainHW4Scene extends HW4Scene {
 
     /** GameSystems in the HW3 Scene */
     private inventoryHud: InventoryHUD;
