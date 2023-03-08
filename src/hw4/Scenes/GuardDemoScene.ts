@@ -28,9 +28,9 @@ import { ClosestPositioned } from "../GameSystems/Searching/HW3Reducers";
 import BasicTargetable from "../GameSystems/Targeting/BasicTargetable";
 import Position from "../GameSystems/Targeting/Position";
 import AstarStrategy from "../Pathfinding/AstarStrategy";
-import HW3Scene from "./HW3Scene";
+import HW4Scene from "./HW4Scene";
 
-export default class GuardDemoScene extends HW3Scene {
+export default class GuardDemoScene extends HW4Scene {
 
     private player: PlayerActor;
     /** All the battlers in the HW3Scene (including the player) */
