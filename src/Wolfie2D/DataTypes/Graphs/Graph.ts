@@ -86,6 +86,8 @@ export default class Graph {
 			}
 			edge = edge.next;
 		}
+
+		return false;
 	}
 
 	/**

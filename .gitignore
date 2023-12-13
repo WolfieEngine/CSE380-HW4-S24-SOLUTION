@@ -7,3 +7,5 @@ dist/*
 !dist/builtin
 
 !dist/hw4_assets/
+
+.DS_Store

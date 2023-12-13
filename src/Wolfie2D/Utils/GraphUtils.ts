@@ -1,10 +1,17 @@
 import Graph from "../DataTypes/Graphs/Graph";
 import EdgeNode from "../DataTypes/Graphs/EdgeNode";
 import BinaryHeapSet from "../DataTypes/Collections/BinaryHeapSet";
+import TernaryHeapSet from "../DataTypes/Collections/TernaryHeapSet";
+import ResourceManager from '../ResourceManager/ResourceManager';
+import PositionGraph from "../DataTypes/Graphs/PositionGraph";
+
+export enum OpenSetType {
+	BINARY_HEAP,
+	TERNARY_HEAP
+}
 
 /** A class to provides some utility functions for graphs */
 export default class GraphUtils {
-
 	/**
 	 * An implementation of Djikstra's shortest path algorithm based on the one described in The Algorithm Design Manual.
 	 * @param g The graph
@@ -63,6 +70,18 @@ export default class GraphUtils {
 
 	}
 
+	static astarPositional(g: PositionGraph, start: number, goal: number, heuristic?: (node: number) => number, openSetType?: OpenSetType, heuristicNudging?: boolean): Array<number> {
+		if(!heuristic) {
+			heuristic = (node: number) => { 
+				let from = g.getNodePosition(start);
+				let to = g.getNodePosition(goal);
+				return Math.abs(from.x - to.x) + Math.abs(from.y - to.y)
+			}
+		}
+		
+		return this.astar(g, start, goal, heuristic, openSetType, heuristicNudging)
+	}
+
 	/**
 	 * An implementation of the A* algorithm
 	 * @param g the graph to search
@@ -72,7 +91,9 @@ export default class GraphUtils {
 	 * @return if a path between start and goal exists, an array of nodes representing the path from start 
 	 * to goal found by A*; otherwise null
 	 */
-	static astar(g: Graph, start: number, goal: number, heuristic: (node: number) => number): Array<number> {
+	static astar(g: Graph, start: number, goal: number, heuristic: (node: number) => number, openSetType?: OpenSetType, heuristicNudging?: boolean): Array<number> {
+
+		let numExpanded = 0;
 
 		// Construct a new map of the gScores - start gets a gScore of 0
 		let gScore = new Map<number, number>();
@@ -85,14 +106,36 @@ export default class GraphUtils {
 		// Construct a new map to hold the path from start to goal
 		let cameFrom = new Map<number, number>();
 
-		// The open-set of nodes to be explored. Starts off with just starting node
-		let openSet = new BinaryHeapSet<number>((e1, e2) => {
+		let compare = (e1, e2) => {
 			let e1fScore = fScore.has(e1) ? fScore.get(e1) : Number.POSITIVE_INFINITY;
 			let e2fScore = fScore.has(e2) ? fScore.get(e2) : Number.POSITIVE_INFINITY;
+
+			if(e1fScore == e2fScore) {
+				let e1hScore = fScore.has(e1) ? fScore.get(e1) - gScore.get(e1) : Number.POSITIVE_INFINITY;
+				let e2hScore = fScore.has(e2) ? fScore.get(e2) - gScore.get(e2) : Number.POSITIVE_INFINITY;
+
+				if(e1hScore < e2hScore) return 1;
+				return 0;
+			}
+
 			if (e1fScore < e2fScore) return 1;
 			return 0
-		})
+		}
+
+		// The open-set of nodes to be explored. Starts off with just starting node
+		let openSet;
+
+		switch(openSetType) {
+			case OpenSetType.TERNARY_HEAP:
+				openSet = new TernaryHeapSet<number>(compare)
+				break
+			default:
+				openSet = new BinaryHeapSet<number>(compare)
+				break
+		}
+		
 		openSet.push(start);
+
 
 		// While there are elements in the openSet - explore the nodes
 		while (!openSet.isEmpty()) {
@@ -101,9 +144,12 @@ export default class GraphUtils {
 
 			// If the next node is the goal - return the path
 			if (current === goal) {
-				let res = GraphUtils.astarPathBuilder(cameFrom, current);
+				
+				let res = GraphUtils.astarPathBuilder(g, cameFrom, current);
 				return res;
 			}
+
+			numExpanded++;
 
 			// Otherwise - remove the current node from the openSet and explore it's neighbors
 			openSet.pop();
@@ -112,9 +158,10 @@ export default class GraphUtils {
 			let edge = g.edges[current]
 
 			while (edge !== null && edge !== undefined) {
+
 				// Get the neighbor node from the edge
 				let neighbor = edge.y;
-
+				
 				// Get tentative gscore
 				let tentative_gscore = gScore.get(current) + edge.weight;
 
@@ -125,7 +172,16 @@ export default class GraphUtils {
 
 					cameFrom.set(neighbor, current);
 					gScore.set(neighbor, tentative_gscore);
-					fScore.set(neighbor, tentative_gscore + heuristic(neighbor));
+					let hScore = heuristic(neighbor);
+
+					/*
+						This heuristic nudging idea was adapted from the following online source:
+						https://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html#:~:text=A*
+					*/
+					if(heuristicNudging)
+						hScore *= (1 + 1/200);
+
+					fScore.set(neighbor, tentative_gscore + hScore);
 
 					// If the openSet already contains the neighbor, then restore the heap about the neighbor
 					if (openSet.has(neighbor)) {
@@ -139,10 +195,11 @@ export default class GraphUtils {
 				edge = edge.next;
 			}
 		}
+
 		return null;
 	}
 
-	private static astarPathBuilder(cameFrom: Map<number, number>, current: number): Array<number> {
+	private static astarPathBuilder(g: Graph, cameFrom: Map<number, number>, current: number): Array<number> {
 		let path = new Array();
 		path.push(current);
 		while (cameFrom.has(current)) {
